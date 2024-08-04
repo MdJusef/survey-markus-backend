@@ -7,5 +7,8 @@ use Illuminate\Http\Request;
 
 class CCompanyController extends Controller
 {
-    //
+    public function companyDashboard()
+    {
+
+    }
 }

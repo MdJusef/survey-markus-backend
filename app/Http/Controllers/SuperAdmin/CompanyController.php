@@ -4,7 +4,10 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRequest;
+use App\Http\Requests\ProjectAssignRequest;
 use App\Mail\OtpMail;
+use App\Models\AssignProject;
+use App\Models\CompanyJoin;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,9 +19,33 @@ class CompanyController extends Controller
 {
     public function index()
     {
+        $company_info = User::with('projects.surveys')->where('role_type', 'COMPANY')->paginate(10);
+        $formattedData = $company_info->getCollection()->map(function($company) {
+            return [
+                'id' => $company->id,
+                'name' => $company->name,
+                'email' => $company->email,
+                'company_id' => $company->company_id,
+                'image' => $company->image,
+                'address' => $company->address,
+                'phone_number' => $company->phone_number,
+                'project_count' => $company->projects->count(),
+                'survey_count' => $company->projects->sum(function($project) {
+                    return $project->surveys->count();
+                }),
+            ];
+        });
 
+        $paginatedData = new \Illuminate\Pagination\LengthAwarePaginator(
+            $formattedData,
+            $company_info->total(),
+            $company_info->perPage(),
+            $company_info->currentPage(),
+            ['path' => $company_info->path()]
+        );
+
+        return response()->json($paginatedData, 200);
     }
-
     public function store(CompanyRequest $request)
     {
         $user = new User();
@@ -79,5 +106,76 @@ class CompanyController extends Controller
             removeImage($company->image);
         }
         $company->delete();
+        return response()->json(['message' => 'Company deleted successfully'], 200);
     }
+
+    public function showRequest()
+    {
+        $company_id = auth()->user()->id;
+        if (empty($company_id)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $employee_request = CompanyJoin::with('user')->where('company_id',$company_id)->where('status','pending')->paginate(10);
+        return response()->json(['data' => $employee_request]);
+    }
+
+    public function acceptRequest(ProjectAssignRequest $request)
+    {
+        $company_id = auth()->user()->id;
+        if (empty($company_id)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $id = $request->id;
+        $user_id = $request->user_id;
+        $project_ids = json_decode($request->project_ids);
+        $company = CompanyJoin::with('user')->where('id', $id)->where('company_id',$company_id)->where('status','pending')->first();
+        if (empty($company)) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $projects = AssignProject::where('user_id', $user_id)->first();
+        if (!array(empty($projects))) {
+            return response()->json(['message' => 'Projects already assigned'], 401);
+        }
+        $assign_project = new AssignProject();
+        $assign_project->user_id = $user_id;
+        $assign_project->company_id = $company_id;
+        $assign_project->project_ids = json_encode($project_ids);
+        $assign_project->save();
+
+        $company->status = 'accepted';
+        $company->save();
+        return response()->json(['message' => 'Projects assigned successfully'], 200);
+    }
+
+//    public function acceptRequest(ProjectAssignRequest $request)
+//    {
+//        $company_id = auth()->user()->id;
+//        if (empty($company_id)) {
+//            return response()->json(['message' => 'Unauthorized'], 401);
+//        }
+//        $id = $request->id;
+//        $user_id = $request->user_id;
+//        $project_ids = json_decode($request->project_ids);
+//        $company = CompanyJoin::with('user')->where('id', $id)->where('company_id',$company_id)->where('status','pending')->first();
+//        if (empty($company)) {
+//            return response()->json(['message' => 'User not found'], 404);
+//        }
+//
+//        $projects = AssignProject::where('user_id', $user_id)->first();
+//        if (!array(empty($projects))) {
+//            return response()->json(['message' => 'Projects already assigned'], 401);
+//        }
+//        foreach ($project_ids as $project_id) {
+//            $assign_project = new AssignProject();
+//            $assign_project->user_id = $user_id;
+//            $assign_project->company_id = $company_id;
+//            $assign_project->project_id = $project_id;
+//            $assign_project->save();
+//        }
+//        $company->status = 'accepted';
+//        $company->save();
+//        return response()->json(['message' => 'Projects assigned successfully'], 200);
+//    }
+
 }

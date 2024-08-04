@@ -22,12 +22,11 @@ class ProjectController extends Controller
         return response()->json(['data' => $projects], 200);
     }
 
-
     public function store(ProjectRequest $request)
     {
         $user_id = auth()->user()->id;
         if (empty($user_id)){
-            return response()->json(['error' => 'You are not authorized to access this page.'], 401);
+            return response()->json(['message' => 'You are not authorized to access this page.'], 401);
         }
         $project = new Project();
         $project->user_id = $user_id;
@@ -38,12 +37,12 @@ class ProjectController extends Controller
 
     public function show(string $id)
     {
-        //
+
     }
 
     public function edit(string $id)
     {
-        //
+
     }
 
     public function update(Request $request, string $id)

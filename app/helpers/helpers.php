@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Illuminate\Http\UploadedFile;
 
 function saveImage($request, $type)
 {

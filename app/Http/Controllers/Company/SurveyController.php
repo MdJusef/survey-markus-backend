@@ -31,42 +31,46 @@ class SurveyController extends Controller
             return response()->json(['message' => 'unauthorized'], 401);
         }
         $survey = new Survey();
-        $survey->user_id = $user_id;
+        $survey->user_id = $user_id; // company_id
         $survey->project_id = $request->project_id;
         $survey->survey_name = $request->survey_name;
+        $survey->emoji_or_star = $request->emoji_or_star;
+        $survey->repeat_status = $request->repeat_status; //once, daily,weekly,monthly
+        $survey->start_date = $request->start_date;
+        $survey->end_date = $request->end_date;
         $survey->save();
         return response()->json(['message' => 'Survey created successfully', 'data' => $survey], 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy( string $id)
     {
-        //
+        $user_id = auth()->user()->id;
+        if (empty($user_id)) {
+            return response()->json(['message' => 'unauthorized'], 401);
+        }
+
+        $survey = Survey::where('id', $id)->where('user_id', $user_id)->first();
+        if (!$survey) {
+            return response()->json(['message' => 'Survey not found or you are not authorized to delete this survey'], 404);
+        }
+
+        $survey->delete();
+        return response()->json(['message' => 'Survey deleted successfully'], 200);
     }
+
 }

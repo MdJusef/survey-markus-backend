@@ -141,16 +141,13 @@ class AuthController extends Controller
         $email = $request->email;
         $user = User::where('email', $email)->first();
         if (!$user) {
-            return response()->json(['error' => 'Email not found'], 401);
-        } else if ($user->google_id != null || $user->apple_id != null) {
-            return response()->json([
-                'message' => 'Your are social user, You do not need to forget password',
-            ], 400);
+            return response()->json(['message' => 'Email not found'], 401);
         } else {
             $random = Str::random(6);
             Mail::to($request->email)->send(new OtpMail($random));
-            $user->update(['otp' => $random]);
-            $user->update(['verify_email' => 0]);
+            $user->otp = $random;
+            $user->email_verified_at = new Carbon();
+            $user->save();
             return response()->json(['message' => 'Please check your email for get the OTP']);
         }
     }
@@ -179,7 +176,7 @@ class AuthController extends Controller
                 'message' => 'Your email is not exists'
             ], 401);
         }
-        if ($user->verify_email == 0) {
+        if ($user->email_verified_at == null) {
             return response()->json([
                 'message' => 'Your email is not verified'
             ], 401);
@@ -221,40 +218,32 @@ class AuthController extends Controller
         }
     }
 
-    public function editProfile(Request $request, $id)
+    public function updateProfile(Request $request)
     {
         $user = $this->guard()->user();
 
         if ($user) {
             $validator = Validator::make($request->all(), [
-                'fullName' => 'string|min:2|max:100',
+                'name' => 'string|min:2|max:100',
+                'company_id' => '',
+                'email' => '',
             ]);
 
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
             }
-            $user->fullName = $request->fullName ? $request->fullName : $user->fullName;
-            $user->mobile = $request->mobile ? $request->mobile : $user->mobile;
-            $user->address = $request->address ? $request->address : $user->address;
+            $user->name = $request->name ?? $user->name;
+            $user->company_id = $request->company_id ??  $user->company_id;
+            $user->email = $request->email ?? $user->email;
 
-            if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $destination = 'storage/image/' . $user->image;
-
-                if (File::exists($destination)) {
-                    File::delete($destination);
+            if ($request->file('image')) {
+                if (!empty($user->image)) {
+                    removeImage($user->image);
                 }
-
-                $timeStamp = time();  // Current timestamp
-                $fileName = $timeStamp . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('image', $fileName, 'public');
-
-                $filePath = '/storage/image/' . $fileName;
-                $fileUrl = $filePath;
-                $user->image = $fileUrl;
+                $user->image = saveImage($request, 'image');
             }
+            $user->save();
 
-            $user->update();
             return response()->json([
                 'message' => 'Profile updated successfully',
                 'data' => $user,

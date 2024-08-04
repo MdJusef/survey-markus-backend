@@ -17,6 +17,10 @@ class SurveyRequest extends FormRequest
         return [
             'project_id' => 'required|exists:projects,id',
             'survey_name' => 'required',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'repeat_status' => 'required|in:once,daily,weekly,monthly',
+            'emoji_or_star' => 'required|in:emoji,star',
         ];
     }
 }
