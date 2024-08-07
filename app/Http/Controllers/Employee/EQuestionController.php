@@ -8,6 +8,7 @@ use App\Http\Requests\QuestionBasedReportRequest;
 use App\Models\Answer;
 use App\Models\Question;
 use App\Models\Survey;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class EQuestionController extends Controller
@@ -83,44 +84,75 @@ class EQuestionController extends Controller
 
         return response()->json($response);
     }
-
-//    public function eQuestionBasedReport(Request $request)
-//    {
-//        $question_id = $request->question_id;
-//        $survey_id = $request->survey_id;
-//        return Answer::with('question')->where('survey_id',$survey_id)->where('question_id',$question_id)->get();
-//    }
-
     public function eQuestionBasedReport(QuestionBasedReportRequest $request)
     {
         $survey_id = $request->survey_id;
         $question_id = $request->question_id;
+        $date_range = $request->date_range; // Expecting 'today', 'weekly', 'monthly', or specific month like 'January', or null for all data
+
+        // Determine the date range
+        if ($date_range) {
+            switch ($date_range) {
+                case 'today':
+                    $startDate = now()->startOfDay();
+                    $endDate = now()->endOfDay();
+                    break;
+                case 'weekly':
+                    $startDate = now()->startOfWeek();
+                    $endDate = now()->endOfWeek();
+                    break;
+                case 'monthly':
+                    $startDate = now()->startOfMonth();
+                    $endDate = now()->endOfMonth();
+                    break;
+                default:
+                    // Assuming specific month format like 'January'
+                    try {
+                        $month = Carbon::parse($date_range)->month;
+                        $startDate = now()->startOfYear()->month($month)->startOfMonth();
+                        $endDate = now()->startOfYear()->month($month)->endOfMonth();
+                    } catch (\Exception $e) {
+                        return response()->json(['error' => 'Invalid date range format'], 400);
+                    }
+                    break;
+            }
+        }
 
         // Fetch all answers for the given survey
-        $answers = Answer::with('question')
+        $allAnswers = Answer::with('question.user')
             ->where('survey_id', $survey_id)
             ->where('question_id', $question_id)
             ->get();
 
-        // Group answers by question_id
-        $groupedAnswers = $answers->groupBy('question_id');
+        // Filter answers based on date range (if provided)
+        $filteredAnswers = $allAnswers;
+        if ($date_range) {
+            $filteredAnswers = $allAnswers->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        // Group all answers by question_id
+        $groupedAnswers = $allAnswers->groupBy('question_id');
+        // Group filtered answers by question_id
+        $groupedFilteredAnswers = $filteredAnswers->groupBy('question_id');
 
         $results = [];
 
         foreach ($groupedAnswers as $question_id => $answers) {
-            $totalAnswers = $answers->count();
+            $totalFilteredAnswers = isset($groupedFilteredAnswers[$question_id]) ? $groupedFilteredAnswers[$question_id]->count() : 0;
 
             // Initialize counts for each option (assuming options are 1 to 5)
             $optionCounts = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
 
-            foreach ($answers as $answer) {
-                $optionCounts[$answer->answer]++;
+            if (isset($groupedFilteredAnswers[$question_id])) {
+                foreach ($groupedFilteredAnswers[$question_id] as $answer) {
+                    $optionCounts[$answer->answer]++;
+                }
             }
 
             // Calculate percentages
             $optionPercentages = [];
             foreach ($optionCounts as $option => $count) {
-                $optionPercentages[$option] = ($count / $totalAnswers) * 100;
+                $optionPercentages[$option] = $totalFilteredAnswers > 0 ? ($count / $totalFilteredAnswers) * 100 : 0;
             }
 
             // Prepare result for this question
@@ -130,8 +162,6 @@ class EQuestionController extends Controller
             ];
         }
 
-        return response()->json($results);
+        return response()->json(['data' => $results]);
     }
-
-
 }

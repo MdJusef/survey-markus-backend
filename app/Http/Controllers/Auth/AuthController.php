@@ -28,7 +28,7 @@ class AuthController extends Controller
             Mail::to($request->email)->send(new OtpMail($random));
             $user->otp = $random;
             $user->save();
-            return response(['message' => 'Please check your email for validate your email.'], 200);
+            return response()->json(['message' => 'Please check your email for validate your email.'], 200);
         }else{
             $validator = Validator::make($request->all(), [
                 'name' => 'nullable|string|min:2|max:100',
@@ -56,7 +56,7 @@ class AuthController extends Controller
             Mail::to($request->email)->send(new OtpMail($user->otp));
             return response()->json([
                 'message' => 'Please check your email to valid your email',
-            ]);
+            ],200);
 
         }
     }
