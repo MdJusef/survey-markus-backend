@@ -18,7 +18,7 @@ class CompanyRequest extends FormRequest
         return [
             'name' => 'nullable|string|min:2|max:100',
             'phone_number' => 'nullable|string|min:2|max:20',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'company_id' => 'nullable',
             'email' => 'required|string|email|max:60|unique:users',
             'password' => 'required|string|min:6|confirmed',

@@ -17,7 +17,7 @@ class EmployeeController extends Controller
     public function showCompany(Request $request)
     {
         $query = User::where('role_type', 'COMPANY');
-        $join_company = CompanyJoin::where('user_id', auth()->user()->id)->where('status','accepted')->get();
+        $join_company = CompanyJoin::where('user_id', auth()->user()->id)->whereIn('status',['accepted','pending'])->get();
 
         if ($request->filled('name')) {
             $query->where('name', 'like', $request->name . '%');
@@ -35,6 +35,7 @@ class EmployeeController extends Controller
         return response()->json( $companies);
     }
 
+
     public function joinCompany(JoinCompanyRequest $request)
     {
         $user_id = auth()->user()->id;
@@ -45,6 +46,10 @@ class EmployeeController extends Controller
         $company = User::where('role_type', 'COMPANY')->where('id', $company_id)->first();
         if (empty($company)) {
             return response()->json(['message' => 'Company not found'], 404);
+        }
+        $exist_request = CompanyJoin::where('user_id', $user_id)->where('company_id', $company->id)->first();
+        if ($exist_request) {
+            return response()->json(['message' => 'You already send request'], 208);
         }
         $company_join = new CompanyJoin();
         $company_join->company_id = $company_id;
