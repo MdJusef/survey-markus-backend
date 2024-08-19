@@ -9,6 +9,7 @@ use App\Http\Controllers\Company\SurveyController;
 use App\Http\Controllers\Employee\EmployeeController;
 use App\Http\Controllers\Employee\EQuestionController;
 use App\Http\Controllers\ESurveyController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +76,12 @@ Route::middleware(['auth:api','employee'])->group(function (){
     Route::get('/show-answer-report',[EQuestionController::class, 'showAnswerReports']);
 
     Route::get('/my-survey', [ESurveyController::class, 'mySurvey']);
+
+    Route::get('/notifications', [NotificationController::class, 'notifications']);
+    //Route::get('/admin-notification', [NotificationController::class, 'adminNotification']);
+    Route::get('/read-notification', [NotificationController::class, 'readNotificationById']);
+    Route::get('/mark-as-read/{id}', [NotificationController::class, 'userReadNotification']);
+
 
 });
 

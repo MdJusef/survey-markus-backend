@@ -145,7 +145,17 @@ class CompanyController extends Controller
 
         $company->status = 'accepted';
         $company->save();
-        return response()->json(['message' => 'Projects assigned successfully'], 200);
+
+        $message = 'Request accepted successfully';
+        $image = auth()->user()->image;
+        $name = auth()->user()->name;
+        $time = $assign_project->created_at;
+        $user = User::where('id', $user_id)->first();
+        $result = app('App\Http\Controllers\NotificationController')->sendNotification($image, $name, $message, $time,$user,false);
+        return response()->json([
+            'message' => 'Projects assigned successfully',
+            'notification' => $result,
+        ], 200);
     }
 
 //    public function acceptRequest(ProjectAssignRequest $request)

@@ -37,7 +37,7 @@ class EQuestionController extends Controller
         }
         $answer = Answer::where('user_id',$user_id)->where('question_id',$request->question_id)->first();
         if (!empty($answer)){
-            return response()->json(['message' => 'Answer is already submitted'], 404);
+            return response()->json(['message' => 'Answer is already submitted'], 409);
         }
         // answer should be 1,2,3,4,5;
         $answer = new Answer();

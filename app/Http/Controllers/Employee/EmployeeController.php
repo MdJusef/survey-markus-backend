@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyWiseProjectRequest;
 use App\Http\Requests\JoinCompanyRequest;
 use App\Http\Requests\ProjectBasedSurveyRequest;
+use App\Models\Answer;
 use App\Models\AssignProject;
 use App\Models\CompanyJoin;
 use App\Models\Project;
@@ -23,7 +24,7 @@ class EmployeeController extends Controller
             $query->where('name', 'like', $request->name . '%');
         }
 
-        $companies = $query->paginate(3);
+        $companies = $query->paginate(20);
 
         $companies->getCollection()->transform(function ($company) use ($join_company) {
             $joinCompanyStatus = $join_company->firstWhere('company_id', $company->id);
@@ -75,7 +76,7 @@ class EmployeeController extends Controller
                 $query->where('project_name', 'like', '%' . $request->project_name . '%');
             }
 
-            $assignProjects->projects = $query->paginate(3);
+            $assignProjects->projects = $query->paginate(20);
             return response()->json(['data' => $assignProjects],200);
         }
         return response()->json(['message' => 'Projects not found'], 404);
@@ -90,7 +91,14 @@ class EmployeeController extends Controller
         if ($request->filled('survey_name')){
             $query->where('survey_name', 'like' , '%' . $request->input('survey_name') . '%');
         }
-        $surveys = $query->paginate(3);
+        if ($request->filled('auth_user')){
+            $employee_id = auth()->user()->id;
+            $get_survey_ids = Answer::where('user_id', $employee_id)->pluck('survey_id')->unique();
+
+            // Modify the query to include only the surveys that exist in the Answer table
+            $query->whereIn('id', $get_survey_ids);
+        }
+        $surveys = $query->paginate(20);
         return response()->json($surveys);
     }
 
@@ -100,7 +108,7 @@ class EmployeeController extends Controller
         if (!$auth_user_id){
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $company = CompanyJoin::with('user')->paginate(3);
+        $company = CompanyJoin::with('user')->where('status','accepted')->paginate(20);
         return response()->json( $company,200);
     }
 }
