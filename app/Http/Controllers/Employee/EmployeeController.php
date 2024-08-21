@@ -108,7 +108,7 @@ class EmployeeController extends Controller
         if (!$auth_user_id){
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $company = CompanyJoin::with('user')->where('status','accepted')->paginate(20);
+        $company = CompanyJoin::where('user_id',$auth_user_id)->with('user')->where('status','accepted')->paginate(20);
         return response()->json( $company,200);
     }
 }

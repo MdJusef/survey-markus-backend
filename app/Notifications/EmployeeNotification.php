@@ -34,7 +34,7 @@ class EmployeeNotification extends Notification
             'name' => $this->name,
             'message' => $this->message,
             'time' => $this->time,
-            'data' => $this->data,
+//            'data' => $this->data,
             'isGlobal' => $this->isGlobal,
         ];
     }

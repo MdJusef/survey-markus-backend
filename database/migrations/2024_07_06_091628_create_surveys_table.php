@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('survey_name');
             $table->string('emoji_or_star');
             $table->string('repeat_status');
-            $table->string('archive_status')->nullable();
+            $table->string('archive_status')->default('false');
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();

@@ -13,7 +13,8 @@ class SurveyController extends Controller
 
     public function index(Request $request)
     {
-        $query = Survey::query();
+        $company_id = auth()->user()->id;
+        $query = Survey::where('user_id',$company_id);
 
         if ($request->filled('search'))
         {
@@ -40,12 +41,12 @@ class SurveyController extends Controller
         $survey->start_date = $request->start_date;
         $survey->end_date = $request->end_date;
         $survey->save();
-        $message = 'Request accepted successfully';
+        $message = 'Company join request accepted successfully';
         $image = auth()->user()->image;
         $name = auth()->user()->name;
         $time = $survey->created_at;
         $user = User::where('id', $user_id)->first();
-        $result = app('App\Http\Controllers\NotificationController')->sendNotification($image, $name, $time, $message,$user,true);
+        $result = app('App\Http\Controllers\NotificationController')->sendNotification($image, $name, $message, $time,$user,true);
         return response()->json([
             'message' => 'Survey created successfully',
             'data' => $survey,

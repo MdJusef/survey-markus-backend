@@ -11,7 +11,8 @@ class ProjectController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Project::query();
+        $company_id = auth()->user()->id;
+        $query = Project::where('user_id',$company_id);
 
         if ($request->filled('search'))
         {
@@ -52,6 +53,22 @@ class ProjectController extends Controller
 
     public function destroy(string $id)
     {
-        //
+        $user_id = auth()->user()->id;
+        if (empty($user_id)) {
+            return response()->json(['message' => 'You are not authorized to access this page.'], 401);
+        }
+
+        // Find the project by id
+        $project = Project::where('user_id', $user_id)->find($id);
+
+        if (!$project) {
+            return response()->json(['message' => 'Project not found or you do not have permission to delete this project.'], 404);
+        }
+
+        // Delete the project
+        $project->delete();
+
+        return response()->json(['message' => 'Project deleted successfully']);
     }
+
 }

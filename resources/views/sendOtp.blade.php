@@ -38,13 +38,13 @@
 <body>
 <div class="email-container">
     <div class="header">
-        <h1>Barbar</h1>
+        <h1>Survey</h1>
     </div>
     <div class="content">
 
         <h1>Send Otp</h1>
 
-        <h3>Email from: <a href="barbar@gmail.com">barbar@gmail.com</a></h3>
+        <h3>Email from: <a href="surveymarkus@gmail.com">surveymarkus@gmail.com</a></h3>
         <h3>Your one time Code is <strong style="color: #007bff">{{ $otp }}</strong></h3>
         <h3>Thank you</h3>
 

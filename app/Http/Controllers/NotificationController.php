@@ -64,7 +64,10 @@ class NotificationController extends Controller
             $userId = $user->id;
             $query = DB::table('notifications')
                 ->where('notifiable_id', $userId)
-                ->orWhere('type', '=', 'App\\Notifications\\EmployeeNotification')
+                ->orWhere(function ($query) {
+                    $query->where('type', '=', 'App\\Notifications\\EmployeeNotification')
+                        ->whereJsonContains('data->isGlobal', true);
+                })
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -97,11 +100,10 @@ class NotificationController extends Controller
             $userId = $user->id;
 
             $unreadNotifications = DB::table('notifications')
-                ->where(function ($query) use ($userId) {
-                    $query->where(function ($query) use ($userId) {
-                        $query->where('notifiable_type', 'App\Models\User')
-                            ->where('notifiable_id', $userId);
-                    });
+                ->where('notifiable_id', $userId)
+                ->orWhere(function ($query) {
+                    $query->where('type', '=', 'App\\Notifications\\EmployeeNotification')
+                        ->whereJsonContains('data->isGlobal', true);
                 })
                 ->whereNull('read_at')
                 ->get();

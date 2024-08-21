@@ -8,6 +8,7 @@ use App\Http\Controllers\Company\QuestionController;
 use App\Http\Controllers\Company\SurveyController;
 use App\Http\Controllers\Employee\EmployeeController;
 use App\Http\Controllers\Employee\EQuestionController;
+use App\Http\Controllers\EmployeeDeleteController;
 use App\Http\Controllers\ESurveyController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
@@ -18,8 +19,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-
 
 Route::group([
     ['middleware' => 'auth:api']
@@ -41,6 +40,9 @@ Route::middleware(['auth:api','admin'])->group(function () {
 
     Route::post('/apt', [AptController::class, 'store']);
     Route::post('/update-apt', [AptController::class, 'updateApt']);
+
+    Route::get('/delete-employee-request', [EmployeeDeleteController::class, 'showDeleteEmployeeRequest']);
+    Route::get('/delete-employee/{id}', [EmployeeDeleteController::class, 'employeeDeleteById']);
 });
 
 Route::middleware(['auth:api','company'])->group(function () {
@@ -80,8 +82,9 @@ Route::middleware(['auth:api','employee'])->group(function (){
     Route::get('/notifications', [NotificationController::class, 'notifications']);
     //Route::get('/admin-notification', [NotificationController::class, 'adminNotification']);
     Route::get('/read-notification', [NotificationController::class, 'readNotificationById']);
-    Route::get('/mark-as-read/{id}', [NotificationController::class, 'userReadNotification']);
+    Route::get('/mark-as-read', [NotificationController::class, 'userReadNotification']);
 
+    Route::post('/delete-employee', [EmployeeDeleteController::class, 'employeeDelete']);
 
 });
 

@@ -15,12 +15,10 @@ class QuestionController extends Controller
 
     public function index(Request $request)
     {
-        //$projects = Project::with('surveys.questions')->paginate(10);
-        $projects = Project::with(['surveys' => function ($query) {
-            $query->withCount('questions');
-        }])->paginate(10);
-
-        return response()->json($projects);
+        $company_id = auth()->user()->id;
+        $questions = Survey::where('user_id',$company_id)->with('project')
+            ->withCount('questions')->withCount('answers')->paginate(10);
+        return response()->json($questions);
     }
 
     public function create()
@@ -37,7 +35,6 @@ class QuestionController extends Controller
             'survey_id' => 'required|integer',
             'questions' => 'required',
             'questions.*.question_en' => 'string',
-            //'questions.*.question_jer' => 'string',
             'questions.*.comment' => 'boolean'
         ]);
 
@@ -83,10 +80,48 @@ class QuestionController extends Controller
         //
     }
 
+//    public function update(Request $request, string $id)
+//    {
+//        //
+//    }
     public function update(Request $request, string $id)
     {
-        //
+        $questions = $request->input('questions');
+        try {
+            $responses = [];
+            foreach ($questions as $q) {
+                // Find the existing question by its ID
+                $question = Question::where('survey_id', $id)
+                    ->where('id', $q['id'])
+                    ->where('user_id', auth()->user()->id)
+                    ->first();
+
+                if ($question) {
+                    // Update the question fields
+                    $question->project_id = $request->project_id;
+                    $question->question_en = $q['question_en'];
+                    //$question->question_jer = $q['question_jer'];
+                    $question->comment = $q['comment'];
+                    $question->save();
+
+                    $responses[] = $question;
+                }
+            }
+
+            return response()->json([
+                'message' => 'Questions updated successfully',
+                'data' => $responses
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating questions: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while updating the questions',
+            ], 500);
+        }
     }
+
 
     public function destroy(string $id)
     {
@@ -95,6 +130,15 @@ class QuestionController extends Controller
 
     public function questionBasedReport(Request $request)
     {
+        $options = [1, 2, 3, 4, 5];
+        $optionCounts = collect([
+//            1 => $optionCounts->get(1, 0),
+//            2 => $optionCounts->get(2, 0),
+//            3 => $optionCounts->get(3, 0),
+//            4 => $optionCounts->get(4, 0),
+//            5 => $optionCounts->get(5, 0),
+        ]);
+
         $surveys = Survey::with(['questions.answer', 'project'])->get();
 
         $report = [];
@@ -106,8 +150,12 @@ class QuestionController extends Controller
 //                $totalSurveys = $question->answer->groupBy('survey_id')->count();
 
                 $optionCounts = $question->answer->groupBy('answer')->map->count();
-                $optionPercentages = $optionCounts->map(function ($count) use ($totalUsers) {
-                    return  ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0;
+//                $optionPercentages = $optionCounts->map(function ($count) use ($totalUsers) {
+//                    return  ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0;
+//                });
+                $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
+                    $count = $optionCounts->get($option, 0);
+                    return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
                 });
 
                 $report[] = [
