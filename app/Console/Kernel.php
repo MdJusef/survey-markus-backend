@@ -10,8 +10,7 @@ class Kernel extends ConsoleKernel
 
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
-        $schedule->command('app:archive-expired-surveys')->everyMinute();
+        $schedule->command('app:archive-expired-surveys')->daily();
     }
 
     protected function commands(): void

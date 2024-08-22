@@ -19,4 +19,8 @@ class Answer extends Model
     {
         return $this->belongsTo(Survey::class);
     }
+    public function user():BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

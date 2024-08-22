@@ -10,6 +10,7 @@ use App\Http\Controllers\Employee\EmployeeController;
 use App\Http\Controllers\Employee\EQuestionController;
 use App\Http\Controllers\EmployeeDeleteController;
 use App\Http\Controllers\ESurveyController;
+use App\Http\Controllers\EventManageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
 use Illuminate\Http\Request;
@@ -53,11 +54,22 @@ Route::middleware(['auth:api','company'])->group(function () {
     Route::resource('/surveys', SurveyController::class)->except(['create', 'edit']);
     Route::resource('/questions', QuestionController::class)->except(['create', 'edit']);
 
+    Route::post('/update-questions', [QuestionController::class, 'updateQuestions']);
+
     Route::get('/show-request', [CompanyController::class, 'showRequest']);
     Route::post('/accept-request', [CompanyController::class, 'acceptRequest']);
 
     Route::get('/question-based-report',[QuestionController::class, 'questionBasedReport']);
     Route::get('/question-based-user',[QuestionController::class, 'questionBasedUser']);
+
+
+// Route to generate QR code for a specific survey using its unique code
+    Route::post('/surveys/qrcode/{survey_id}', [EventManageController::class, 'generateQRCode']);
+
+// Route to view questions for a specific survey using its unique code
+    Route::get('/surveys-questions', [EventManageController::class, 'getSurveyQuestions']);
+    Route::get('/single-surveys-questions/{barcode}', [EventManageController::class, 'getSingleSurveyQuestions']);
+
 });
 
 Route::middleware(['auth:api','employee'])->group(function (){

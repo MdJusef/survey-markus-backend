@@ -72,7 +72,9 @@ class QuestionController extends Controller
 
     public function show(string $id)
     {
-        //
+        $company_id = auth()->user()->id;
+        $questions = Survey::where('user_id',$company_id)->where('id',$id)->with('project','questions','answers')->paginate(10);
+        return response()->json($questions);
     }
 
     public function edit(string $id)
@@ -86,40 +88,7 @@ class QuestionController extends Controller
 //    }
     public function update(Request $request, string $id)
     {
-        $questions = $request->input('questions');
-        try {
-            $responses = [];
-            foreach ($questions as $q) {
-                // Find the existing question by its ID
-                $question = Question::where('survey_id', $id)
-                    ->where('id', $q['id'])
-                    ->where('user_id', auth()->user()->id)
-                    ->first();
 
-                if ($question) {
-                    // Update the question fields
-                    $question->project_id = $request->project_id;
-                    $question->question_en = $q['question_en'];
-                    //$question->question_jer = $q['question_jer'];
-                    $question->comment = $q['comment'];
-                    $question->save();
-
-                    $responses[] = $question;
-                }
-            }
-
-            return response()->json([
-                'message' => 'Questions updated successfully',
-                'data' => $responses
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error updating questions: ' . $e->getMessage());
-
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while updating the questions',
-            ], 500);
-        }
     }
 
 
@@ -130,6 +99,8 @@ class QuestionController extends Controller
 
     public function questionBasedReport(Request $request)
     {
+        $survey_id = $request->input('survey_id');
+        $project_id = $request->input('project_id');
         $options = [1, 2, 3, 4, 5];
         $optionCounts = collect([
 //            1 => $optionCounts->get(1, 0),
@@ -139,7 +110,7 @@ class QuestionController extends Controller
 //            5 => $optionCounts->get(5, 0),
         ]);
 
-        $surveys = Survey::with(['questions.answer', 'project'])->get();
+        $surveys = Survey::with(['questions.answer', 'project'])->where('project_id',$project_id)->where('id',$survey_id)->get();
 
         $report = [];
 
@@ -159,8 +130,8 @@ class QuestionController extends Controller
                 });
 
                 $report[] = [
-                    'project' => $survey->project->name,
-                    'survey' => $survey->name,
+                    'project' => $survey->project->project_name,
+                    'survey' => $survey->survey_name,
                     'question_id' => $question->id,
 //                    'total_surveys' => $totalSurveys,
                     'total_comments' => $totalComments,
@@ -176,6 +147,64 @@ class QuestionController extends Controller
 
     public function questionBasedUser(Request $request)
     {
-        return $user = Answer::with('answer')->get();
+        $question_id = $request->input('question_id');
+
+        $user = Answer::where('question_id',$question_id)->with('user')->paginate(10);
+        return response()->json($user);
     }
+    public function updateQuestions(Request $request)
+    {
+        try {
+            // Decode the JSON input
+            $questions = json_decode($request->input('questions'), true);
+
+            // Check for JSON errors
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['error' => 'Invalid JSON format'], 400);
+            }
+
+            // Ensure the decoded JSON is an array
+            if (!is_array($questions)) {
+                return response()->json(['error' => 'Questions should be an array'], 400);
+            }
+
+            $responses = [];
+
+            // Iterate over each question and update accordingly
+            foreach ($questions as $question) {
+                // Validate that the question ID exists
+                if (!isset($question['id'])) {
+                    return response()->json(['error' => 'Question ID is required'], 400);
+                }
+
+                // Find the question or return a 404 error
+                $question_data = Question::find($question['id']);
+                if (!$question_data) {
+                    return response()->json(['error' => 'Question not found for ID ' . $question['id']], 404);
+                }
+
+                // Update the question fields
+                $question_data->question_en = $question['question_en'] ?? $question_data->question_en;
+                $question_data->comment = $question['comment'] ?? $question_data->comment;
+
+                // Save the updated question
+                $question_data->save();
+
+                // Add the updated question to the response array
+                $responses[] = $question_data;
+            }
+
+            return response()->json([
+                'message' => 'Questions updated successfully',
+                'data' => $responses
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Catch any exceptions and return a generic error message
+            return response()->json(['error' => 'An error occurred while updating questions: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+
 }
