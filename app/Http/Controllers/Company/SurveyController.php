@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SurveyRequest;
+use App\Models\Answer;
 use App\Models\Survey;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SurveyController extends Controller
 {
@@ -18,10 +20,10 @@ class SurveyController extends Controller
 
         if ($request->filled('search'))
         {
-            $query->where('survey_name', 'like' , $request->search . '%');
+            $query->where('survey_name', 'like' , '%' . $request->search . '%');
         }
 
-        $projects = $query->paginate(10);
+        $projects = $query->paginate($request->per_page ?? 10);
         return response()->json(['data' => $projects], 200);
     }
 
@@ -175,5 +177,70 @@ class SurveyController extends Controller
         $survey->delete();
         return response()->json(['message' => 'Survey deleted successfully'], 200);
     }
+
+    public function surveyBasedUser(Request $request)
+    {
+
+        $survey_id = $request->survey_id;
+        $query = Answer::with('user','survey.user')->where('survey_id',$survey_id);
+        if ($request->filled('search')){
+           $query->whereHas('user',function($q) use($request){
+               $q->where('name','like', '%' .$request->search . '%');
+           });
+        }
+        $questions = $query->paginate($request->per_page ?? 10);
+        return response()->json($questions);
+    }
+
+    public function deleteSurveyUser(Request $request)
+    {
+        $id = $request->id;
+        $query = Answer::find($id);
+        if (!$query) {
+            return response()->json(['message' => 'Survey user not found'], 404);
+        }
+        $query->delete();
+        return response()->json(['message' => 'Survey user deleted successfully'], 200);
+    }
+
+//    public function testQuery(Request $request)
+//    {
+//        $answer = Answer::with('user')->get();
+//        $survey = Survey::with('user')->get();
+//        return response()->json(['survey_user' => $answer, 'survey_company' => $survey], 200);
+//
+//    }
+
+    public function testQuery(Request $request)
+    {
+
+        $answers = Answer::with('user')
+            ->select('user_id', 'survey_id', \DB::raw('MAX(id) as id'), \DB::raw('MAX(created_at) as created_at'))
+            ->where('survey_id', $request->survey_id)
+            ->groupBy('user_id', 'survey_id')
+            ->with('user')
+            ->get();
+        // Get the distinct user data by user_id
+//        return $answers = Answer::with('user')
+//            ->where('survey_id', $request->survey_id)
+////            ->groupBy('user_id')
+//            ->get();
+
+        // Get the company details using survey_id
+        $survey = Survey::with('user')
+            ->where('id', $request->survey_id)
+            ->first();
+
+        // Add survey_company details to each survey_user object
+        $answers->each(function ($answer) use ($survey) {
+            $answer->survey_company = $survey->user;
+        });
+
+        return response()->json($answers, 200);
+    }
+
+
+
+
 
 }

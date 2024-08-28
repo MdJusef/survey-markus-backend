@@ -126,32 +126,40 @@ class NotificationController extends Controller
         }
     }
 
-    public function adminNotification(){
+    public function adminNotification()
+    {
+        $user = $this->guard()->user();
 
-        $Notifications = DB::table('notifications')
-            ->where('notifications.type', 'App\\Notifications\\AdminNotification')
-            ->orderBy('notifications.created_at', 'desc')
-            ->paginate(7);
+        if ($user) {
+            $userId = $user->id;
+            $query = DB::table('notifications')
+                ->where('notifiable_id', $userId)
+                ->orWhere(function ($query) {
+                    $query->where('type', '=', 'App\\Notifications\\AdminNotification')
+                        ->whereJsonContains('data->isGlobal', true);
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
 
+            $user_notifications = $query->map(function ($notification) {
+                $notification->data = json_decode($notification->data);
+                return $notification;
+            });
 
-//        $formattedReadNotifications = $Notifications->map(function($notification) {
-//            $notification->data = json_decode($notification->data);
-//            return $notification;
-//        });
+            $unread_count = $query->where('read_at',null)->count();
 
-        return response()->json([
-            'message' => 'Notifications List',
-            'notifications' => $Notifications,
-
-//            'pagination' => [
-//                'current_page' => $Notifications->currentPage(),
-//                'total_pages' => $Notifications->lastPage(),
-//                'per_page' => $Notifications->perPage(),
-//                'total' => $Notifications->total(),
-//                'next_page_url' => $Notifications->nextPageUrl(),
-//                'prev_page_url' => $Notifications->previousPageUrl(),
-//            ]
-        ]);
+            return response()->json([
+                'message' => 'Notification list',
+                'notifications' => $user_notifications,
+                'unread_count' => $unread_count,
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'User not authenticated',
+                'notifications' => [],
+                'unread_count' => 0,
+            ], 401);
+        }
     }
 
     public function readNotificationById(Request $request)
@@ -169,6 +177,41 @@ class NotificationController extends Controller
                 'status' => 'error',
                 'message' => 'Notification not found',
             ], 404);
+        }
+    }
+
+    public function companyNotification(Request $request){
+       $user = $this->guard()->user();
+
+        if ($user) {
+            $userId = $user->id;
+            $query = DB::table('notifications')
+                ->where('notifiable_id', $userId)
+//                ->orWhere(function ($query) {
+//                    $query->where('type', '=', 'App\Notifications\CompanyNotification')
+//                        ->whereJsonContains('data->isGlobal', true);
+//                })
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->per_page??10);
+
+            $user_notifications = $query->map(function ($notification) {
+                $notification->data = json_decode($notification->data);
+                return $notification;
+            });
+
+            $unread_count = $query->where('read_at',null)->count();
+
+            return response()->json([
+                'message' => 'Notification list',
+                'notifications' => $user_notifications,
+                'unread_count' => $unread_count,
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'User not authenticated',
+                'notifications' => [],
+                'unread_count' => 0,
+            ], 401);
         }
     }
 }

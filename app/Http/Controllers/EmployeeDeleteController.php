@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EmployeeDeleteRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Testing\Fluent\Concerns\Has;
 
 class EmployeeDeleteController extends Controller
 {
     public function employeeDelete(EmployeeDeleteRequest $request)
     {
+
         $employee_id = auth()->user()->id;
         if (empty($employee_id)){
             return response()->json(['message'=>'Employee ID is empty'],404);
@@ -24,8 +27,16 @@ class EmployeeDeleteController extends Controller
         }
         $user->status = 'deleted';
         $user->save();
-        return response()->json(['message'=>'Your request to delete the account has been submitted to the admin'],200);
-
+        $image = auth()->user()->image;
+        $name = auth()->user()->name;
+        $message = 'Successfully sent a request to join the company.';
+        $time = $user->updated_at;
+        $user = User::whereIn('role_type',['ADMIN','SUPER ADMIN'])->first();
+        $result = app('App\Http\Controllers\NotificationController')->sendAdminNotification($image, $name, $message, $time,$user,false);
+        return response()->json([
+            'message'=>'Your request to delete the account has been submitted to the admin',
+            'notification' => $result
+        ],200);
     }
 
     public function showDeleteEmployeeRequest(Request $request)

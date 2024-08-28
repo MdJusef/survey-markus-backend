@@ -16,10 +16,13 @@ class ProjectController extends Controller
 
         if ($request->filled('search'))
         {
-            $query->where('project_name', 'like' , $request->search . '%');
+            $search = $request->get('search');
+            $query->where('project_name', 'like' , '%' . $search . '%');
         }
 
-        $projects = $query->paginate(10);
+        $per_page = $request->per_page ?? 10;
+
+        $projects = $query->paginate($per_page);
         return response()->json(['data' => $projects], 200);
     }
 

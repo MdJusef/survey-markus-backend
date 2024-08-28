@@ -17,9 +17,17 @@ use Illuminate\Support\Str;
 
 class CompanyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $company_info = User::with('projects.surveys')->where('role_type', 'COMPANY')->paginate(10);
+        $per_page = $request->per_page ?? 10;
+
+        $query = User::with('projects.surveys')->where('role_type', 'COMPANY');
+        if ($request->filled('search'))
+        {
+            $search = $request->search;
+             $query = $query->where('name','like', '%' . $search . '%');
+        }
+        $company_info = $query->paginate($per_page);
         $formattedData = $company_info->getCollection()->map(function($company) {
             return [
                 'id' => $company->id,
@@ -33,6 +41,7 @@ class CompanyController extends Controller
                 'survey_count' => $company->projects->sum(function($project) {
                     return $project->surveys->count();
                 }),
+                'tool_used' => $company->tool_used,
             ];
         });
 

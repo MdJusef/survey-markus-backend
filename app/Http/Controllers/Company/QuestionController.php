@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Models\AnonymousSurveyAnswer;
 use App\Models\Answer;
 use App\Models\Project;
 use App\Models\Question;
@@ -16,8 +17,14 @@ class QuestionController extends Controller
     public function index(Request $request)
     {
         $company_id = auth()->user()->id;
-        $questions = Survey::where('user_id',$company_id)->with('project')
-            ->withCount('questions')->withCount('answers')->paginate(10);
+        $query = Survey::where('user_id',$company_id)->with('project')
+            ->withCount('questions')->withCount('answers');
+        if ($request->filled('search')){
+            $search = $request->get('search');
+            $query->where('survey_name','like', '%' . $search . '%');
+        }
+        $per_page = $request->per_page ?? 10;
+        $questions = $query->paginate($per_page);
         return response()->json($questions);
     }
 
@@ -30,9 +37,9 @@ class QuestionController extends Controller
     {
         // Validate the request
         $request->validate([
-            'user_id' => 'integer',
-            'project_id' => 'required|integer',
-            'survey_id' => 'required|integer',
+            'user_id' => 'integer|exists:users,id',
+            'project_id' => 'required|integer|exists:projects,id',
+            'survey_id' => 'required|integer|exists:surveys,id',
             'questions' => 'required',
             'questions.*.question_en' => 'string',
             'questions.*.comment' => 'boolean'
@@ -97,59 +104,135 @@ class QuestionController extends Controller
         //
     }
 
+//    public function questionBasedReport(Request $request)
+//    {
+//        $survey_id = $request->input('survey_id');
+//        $project_id = $request->input('project_id');
+//        $options = [1, 2, 3, 4, 5];
+//        $optionCounts = collect([
+////            1 => $optionCounts->get(1, 0),
+////            2 => $optionCounts->get(2, 0),
+////            3 => $optionCounts->get(3, 0),
+////            4 => $optionCounts->get(4, 0),
+////            5 => $optionCounts->get(5, 0),
+//        ]);
+//        $surveys = Survey::with(['questions.answer', 'project'])->where('project_id',$project_id)->where('id',$survey_id)->get();
+//
+//        $report = [];
+//
+//        foreach ($surveys as $survey) {
+//            foreach ($survey->questions as $question) {
+//                $totalUsers = $question->answer->groupBy('user_id')->count();
+//                $totalComments = $question->answer->where('comment', '!=', null)->count();
+////                $totalSurveys = $question->answer->groupBy('survey_id')->count();
+//
+//                $optionCounts = $question->answer->groupBy('answer')->map->count();
+////                $optionPercentages = $optionCounts->map(function ($count) use ($totalUsers) {
+////                    return  ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0;
+////                });
+//                $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
+//                    $count = $optionCounts->get($option, 0);
+//                    return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
+//                });
+//
+//                $report[] = [
+//                    'project' => $survey->project->project_name,
+//                    'survey' => $survey->survey_name,
+//                    'question_id' => $question->id,
+//                    'question' => $question->question_en,
+////                    'total_surveys' => $totalSurveys,
+//                    'total_comments' => $totalComments,
+//                    'total_users' => $totalUsers,
+//                    'option_percentages' => $optionPercentages
+//                ];
+//            }
+//        }
+//
+//        return response()->json($report);
+//    }
+
     public function questionBasedReport(Request $request)
     {
+
         $survey_id = $request->input('survey_id');
         $project_id = $request->input('project_id');
-        $options = [1, 2, 3, 4, 5];
-        $optionCounts = collect([
-//            1 => $optionCounts->get(1, 0),
-//            2 => $optionCounts->get(2, 0),
-//            3 => $optionCounts->get(3, 0),
-//            4 => $optionCounts->get(4, 0),
-//            5 => $optionCounts->get(5, 0),
-        ]);
+        $perPage = $request->input('per_page', 10); // Default to 10 if 'per_page' is not present
 
-        $surveys = Survey::with(['questions.answer', 'project'])->where('project_id',$project_id)->where('id',$survey_id)->get();
+
+
+        $options = [1, 2, 3, 4, 5];
+
+        $surveys = Survey::with(['questions.answer', 'project'])
+            ->where('project_id', $project_id)
+            ->where('id', $survey_id)
+            ->first();
 
         $report = [];
 
-        foreach ($surveys as $survey) {
-            foreach ($survey->questions as $question) {
+        if ($surveys) {
+            $questions = $surveys->questions()->paginate($perPage); // Pagination on questions
+
+            foreach ($questions as $question) {
+                $anonymous_survey_count = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
+                $app_survey_count = Answer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
+                $overall_survey_count = $anonymous_survey_count + $app_survey_count;
+
                 $totalUsers = $question->answer->groupBy('user_id')->count();
                 $totalComments = $question->answer->where('comment', '!=', null)->count();
-//                $totalSurveys = $question->answer->groupBy('survey_id')->count();
 
                 $optionCounts = $question->answer->groupBy('answer')->map->count();
-//                $optionPercentages = $optionCounts->map(function ($count) use ($totalUsers) {
-//                    return  ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0;
-//                });
+
                 $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
                     $count = $optionCounts->get($option, 0);
                     return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
                 });
 
                 $report[] = [
-                    'project' => $survey->project->project_name,
-                    'survey' => $survey->survey_name,
+                    'project' => $surveys->project->project_name,
+                    'survey' => $surveys->survey_name,
                     'question_id' => $question->id,
-//                    'total_surveys' => $totalSurveys,
+                    'question' => $question->question_en,
                     'total_comments' => $totalComments,
                     'total_users' => $totalUsers,
-                    'option_percentages' => $optionPercentages
+                    'option_percentages' => $optionPercentages,
+                    'qr_code_survey' => $anonymous_survey_count,
+                    'app_survey_count' => $app_survey_count,
+                    'overall_survey' => $overall_survey_count,
                 ];
             }
+
+            // Return paginated data
+            return response()->json([
+                'data' => $report,
+                'pagination' => [
+                    'total' => $questions->total(),
+                    'per_page' => $questions->perPage(),
+                    'current_page' => $questions->currentPage(),
+                    'last_page' => $questions->lastPage(),
+                    'from' => $questions->firstItem(),
+                    'to' => $questions->lastItem(),
+                ]
+            ]);
         }
 
-        return response()->json($report);
+        return response()->json([]);
     }
+
 
 
     public function questionBasedUser(Request $request)
     {
         $question_id = $request->input('question_id');
+        $query = Answer::where('question_id',$question_id)->with('user');
+        if ($request->filled('search'))
+        {
+            $search = $request->input('search');
+            $query->whereHas('user', function ($query) use ($search) {
+                $query->where('name', 'like', '%'. $search . '%');
+            });
+        }
+        $user = $query->paginate($per_page = $request->per_page ?? 10);
 
-        $user = Answer::where('question_id',$question_id)->with('user')->paginate(10);
         return response()->json($user);
     }
     public function updateQuestions(Request $request)

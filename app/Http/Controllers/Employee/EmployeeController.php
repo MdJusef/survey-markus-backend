@@ -57,7 +57,17 @@ class EmployeeController extends Controller
         $company_join->user_id = $user_id;
         $company_join->status = 'pending';
         $company_join->save();
-        return response()->json(['message' => 'Successfully sent a request to join the company.' , 'data' => $company_join]);
+        $image = auth()->user()->image;
+        $name = auth()->user()->name;
+        $message = 'Successfully sent a request to join the company.';
+        $time = $company_join->created_at;
+        $user = User::where('id', $company_id)->first();
+        $result = app('App\Http\Controllers\NotificationController')->sendCompanyNotification($image, $name, $message, $time,$user,false);
+        return response()->json([
+            'message' => 'Successfully sent a request to join the company.',
+            'data' => $company_join,
+            'notification' => $result,
+            ]);
     }
 
     public function companyWiseProjects(CompanyWiseProjectRequest $request)

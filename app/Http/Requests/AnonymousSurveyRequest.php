@@ -3,10 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
-class EmployeeDeleteRequest extends FormRequest
+class AnonymousSurveyRequest extends FormRequest
 {
 
     public function authorize(): bool
@@ -14,10 +12,11 @@ class EmployeeDeleteRequest extends FormRequest
         return true;
     }
 
+
     public function rules(): array
     {
         return [
-            'password' => 'required|confirmed',
+            'question_id' => 'required|exists:questions,id',
         ];
     }
 }

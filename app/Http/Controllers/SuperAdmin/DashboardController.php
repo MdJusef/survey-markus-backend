@@ -1,37 +1,29 @@
 <?php
 
-namespace App\Http\Controllers\Company;
+namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
 use App\Models\Project;
 use App\Models\Survey;
+use App\Models\User;
 use Illuminate\Http\Request;
 
-class CCompanyController extends Controller
+class DashboardController extends Controller
 {
-    public function companyDashboard(Request $request)
+    public function adminDashboard(Request $request)
     {
         $auth_user_id = auth()->user()->id;
         $year = $request->input('year', now()->year); // Default to the current year if no year is provided
 
         // Total projects and surveys count
-        $total_project = Project::where('user_id', $auth_user_id)
-            ->whereYear('created_at', $year)
-            ->count();
+        $total_company = User::where('role_type', 'COMPANY')->count();
+        $total_removed_company = User::where('role_type','COMPANY')->onlyTrashed()->count();
 
-        $total_survey = Survey::where('user_id', $auth_user_id)
-            ->whereYear('created_at', $year)
-            ->count();
 
-        // Total responses count filtered by year
-        $total_response = Answer::whereHas('survey', function($query) use ($auth_user_id, $year) {
-            $query->where('user_id', $auth_user_id)
-                ->whereYear('created_at', $year);
-        })->count();
 
         // Month-wise projects count filtered by year
-        $projects_by_month = Project::where('user_id', $auth_user_id)
+        $users_by_month = User::where('role_type', 'EMPLOYEE')
             ->whereYear('created_at', $year)
             ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
             ->groupBy('year', 'month')
@@ -40,7 +32,7 @@ class CCompanyController extends Controller
             ->get();
 
         // Ensure each month has a value
-        $projects_by_month = $this->fillMissingMonths($projects_by_month, 'count', $year);
+        $projects_by_month = $this->fillMissingMonths($users_by_month, 'count', $year);
 
         // Month-wise responses count filtered by year
         $responses_by_month = Answer::whereHas('survey', function($query) use ($auth_user_id, $year) {
@@ -57,11 +49,11 @@ class CCompanyController extends Controller
         $responses_by_month = $this->fillMissingMonths($responses_by_month, 'count', $year);
 
         return response()->json([
-            'total_project' => $total_project,
-            'total_survey' => $total_survey,
-            'total_response' => $total_response,
-            'projects_by_month' => $projects_by_month,
-            'responses_by_month' => $responses_by_month,
+            'total_company' => $total_company,
+            'total_added_company' => $total_company,
+            'total_removed_company' => $total_removed_company,
+            'users_by_month' => $users_by_month,
+            'company_growth_by_month' => $responses_by_month,
         ]);
     }
 
@@ -83,4 +75,5 @@ class CCompanyController extends Controller
 
         return collect($filledData);
     }
+
 }

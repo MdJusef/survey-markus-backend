@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\APTController;
+use App\Http\Controllers\ArchiveSurveyController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Company\CCompanyController;
 use App\Http\Controllers\Company\ProjectController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\ESurveyController;
 use App\Http\Controllers\EventManageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
+use App\Http\Controllers\SuperAdmin\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +39,9 @@ Route::group([
 });
 
 Route::middleware(['auth:api','admin'])->group(function () {
+
+    Route::get('/admin-dashboard', [DashboardController::class, 'adminDashboard']);
+
     Route::resource('/companies', CompanyController::class);
 
     Route::post('/apt', [AptController::class, 'store']);
@@ -44,6 +49,9 @@ Route::middleware(['auth:api','admin'])->group(function () {
 
     Route::get('/delete-employee-request', [EmployeeDeleteController::class, 'showDeleteEmployeeRequest']);
     Route::get('/delete-employee/{id}', [EmployeeDeleteController::class, 'employeeDeleteById']);
+
+    Route::get('/admin-notifications', [NotificationController::class, 'adminNotification']);
+//    Route::get('/read-notification/{id}', [NotificationController::class, 'readNotificationById']);
 });
 
 Route::middleware(['auth:api','company'])->group(function () {
@@ -68,9 +76,27 @@ Route::middleware(['auth:api','company'])->group(function () {
 
 // Route to view questions for a specific survey using its unique code
     Route::get('/surveys-questions', [EventManageController::class, 'getSurveyQuestions']);
-    Route::get('/single-surveys-questions/{barcode}', [EventManageController::class, 'getSingleSurveyQuestions']);
+
+
+    Route::get('/company-notifications', [NotificationController::class, 'companyNotification']);
+
+    Route::get('/archive-surveys', [ArchiveSurveyController::class, 'archiveSurveys']);
+
+    Route::get('/survey-based-user', [SurveyController::class, 'surveyBasedUser']);
+    Route::delete('/delete-survey-user', [SurveyController::class, 'deleteSurveyUser']);
+
+    Route::get('/delete-event', [EventManageController::class, 'deleteEvent']);
+
+    Route::get('/test-query', [SurveyController::class, 'testQuery']);
+
+
+
 
 });
+
+Route::get('/single-surveys-questions/{barcode}', [EventManageController::class, 'getSingleSurveyQuestions']);
+Route::post('/anonymous-surveys', [EventManageController::class, 'anonymousSurveys']);
+Route::get('/anonymous-survey-report', [EventManageController::class, 'anonymousSurveyReport']);
 
 Route::middleware(['auth:api','employee'])->group(function (){
     //
@@ -92,8 +118,7 @@ Route::middleware(['auth:api','employee'])->group(function (){
     Route::get('/my-survey', [ESurveyController::class, 'mySurvey']);
 
     Route::get('/notifications', [NotificationController::class, 'notifications']);
-    //Route::get('/admin-notification', [NotificationController::class, 'adminNotification']);
-    Route::get('/read-notification', [NotificationController::class, 'readNotificationById']);
+
     Route::get('/mark-as-read', [NotificationController::class, 'userReadNotification']);
 
     Route::post('/delete-employee', [EmployeeDeleteController::class, 'employeeDelete']);
@@ -105,3 +130,6 @@ Route::get('/terms-condition', [AptController::class, 'termsCondition']);
 Route::get('/privacy-policy', [AptController::class, 'privacyPolicy']);
 
 
+Route::middleware(['auth:api','admin.company'])->group(function () {
+    Route::get('/read-notification/{id}', [NotificationController::class, 'readNotificationById']);
+});
