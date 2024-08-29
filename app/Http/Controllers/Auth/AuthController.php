@@ -235,6 +235,8 @@ class AuthController extends Controller
             $user->name = $request->name ?? $user->name;
             $user->company_id = $request->company_id ??  $user->company_id;
             $user->email = $request->email ?? $user->email;
+            $user->address = $request->address ?? $user->address;
+            $user->phone_number = $request->phone_number ?? $user->phone_number;
 
             if ($request->file('image')) {
                 if (!empty($user->image)) {
