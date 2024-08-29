@@ -203,14 +203,6 @@ class SurveyController extends Controller
         return response()->json(['message' => 'Survey user deleted successfully'], 200);
     }
 
-//    public function testQuery(Request $request)
-//    {
-//        $answer = Answer::with('user')->get();
-//        $survey = Survey::with('user')->get();
-//        return response()->json(['survey_user' => $answer, 'survey_company' => $survey], 200);
-//
-//    }
-
     public function testQuery(Request $request)
     {
 
@@ -220,11 +212,6 @@ class SurveyController extends Controller
             ->groupBy('user_id', 'survey_id')
             ->with('user')
             ->get();
-        // Get the distinct user data by user_id
-//        return $answers = Answer::with('user')
-//            ->where('survey_id', $request->survey_id)
-////            ->groupBy('user_id')
-//            ->get();
 
         // Get the company details using survey_id
         $survey = Survey::with('user')

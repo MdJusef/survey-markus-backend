@@ -167,34 +167,6 @@ class CompanyController extends Controller
         ], 200);
     }
 
-//    public function acceptRequest(ProjectAssignRequest $request)
-//    {
-//        $company_id = auth()->user()->id;
-//        if (empty($company_id)) {
-//            return response()->json(['message' => 'Unauthorized'], 401);
-//        }
-//        $id = $request->id;
-//        $user_id = $request->user_id;
-//        $project_ids = json_decode($request->project_ids);
-//        $company = CompanyJoin::with('user')->where('id', $id)->where('company_id',$company_id)->where('status','pending')->first();
-//        if (empty($company)) {
-//            return response()->json(['message' => 'User not found'], 404);
-//        }
-//
-//        $projects = AssignProject::where('user_id', $user_id)->first();
-//        if (!array(empty($projects))) {
-//            return response()->json(['message' => 'Projects already assigned'], 401);
-//        }
-//        foreach ($project_ids as $project_id) {
-//            $assign_project = new AssignProject();
-//            $assign_project->user_id = $user_id;
-//            $assign_project->company_id = $company_id;
-//            $assign_project->project_id = $project_id;
-//            $assign_project->save();
-//        }
-//        $company->status = 'accepted';
-//        $company->save();
-//        return response()->json(['message' => 'Projects assigned successfully'], 200);
-//    }
+
 
 }

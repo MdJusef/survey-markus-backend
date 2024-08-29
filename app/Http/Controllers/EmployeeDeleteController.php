@@ -63,12 +63,12 @@ class EmployeeDeleteController extends Controller
 
     public function cancelDeleteEmployeeRequest($id)
     {
-        $query = User::find($id);
-        if (empty($query)){
+        $user = User::find($id);
+        if (empty($user)){
             return response()->json(['message'=>'Employee ID is empty'],404);
         }
-        $query->status = 'NULL';
-        $query->save();
+        $user->status = 'NULL';
+        $user->save();
         return response()->json(['message'=>'Employee Deleted Request Cancel Successfully'],200);
     }
 }

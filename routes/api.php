@@ -90,9 +90,6 @@ Route::middleware(['auth:api','company'])->group(function () {
 
     Route::get('/test-query', [SurveyController::class, 'testQuery']);
 
-
-
-
 });
 
 Route::get('/single-surveys-questions/{barcode}', [EventManageController::class, 'getSingleSurveyQuestions']);
@@ -134,3 +131,6 @@ Route::get('/privacy-policy', [AptController::class, 'privacyPolicy']);
 Route::middleware(['auth:api','admin.company'])->group(function () {
     Route::get('/read-notification/{id}', [NotificationController::class, 'readNotificationById']);
 });
+
+
+//Route::get('/logout', [AuthController::class, 'logout']);
