@@ -49,6 +49,7 @@ Route::middleware(['auth:api','admin'])->group(function () {
 
     Route::get('/delete-employee-request', [EmployeeDeleteController::class, 'showDeleteEmployeeRequest']);
     Route::get('/delete-employee/{id}', [EmployeeDeleteController::class, 'employeeDeleteById']);
+    Route::get('/cancel-delete-employee/{id}', [EmployeeDeleteController::class, 'cancelDeleteEmployeeRequest']);
 
     Route::get('/admin-notifications', [NotificationController::class, 'adminNotification']);
 //    Route::get('/read-notification/{id}', [NotificationController::class, 'readNotificationById']);

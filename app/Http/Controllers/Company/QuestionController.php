@@ -203,6 +203,7 @@ class QuestionController extends Controller
 
             // Return paginated data
             return response()->json([
+                'emoji_or_star' => $surveys->emoji_or_star,
                 'data' => $report,
                 'pagination' => [
                     'total' => $questions->total(),
