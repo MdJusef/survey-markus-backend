@@ -45,7 +45,10 @@ class EventManageController extends Controller
     // Get survey questions
     public function getSurveyQuestions(Request $request)
     {
-        $query = ManageBarcode::with('survey.questions');
+        $auth_user = auth()->user()->id;
+        $query = ManageBarcode::with('survey.questions')->whereHas('survey', function ($query) use ($auth_user) {
+            $query->where('user_id', $auth_user);
+        });
         if ($request->filled('search')) {
             $query->whereHas('survey', function ($query) use ($request) {
                 $query->where('survey_name','like', '%' . $request->search . '%');

@@ -187,6 +187,7 @@ class NotificationController extends Controller
             $userId = $user->id;
             $query = DB::table('notifications')
                 ->where('notifiable_id', $userId)
+                ->where('type' , 'App\\Notifications\\CompanyNotification')
                 ->orWhere(function ($query) {
                     $query->where('type', '=', 'App\Notifications\CompanyNotification')
                         ->whereJsonContains('data->isGlobal', true);

@@ -62,6 +62,8 @@ class CompanyController extends Controller
         $user->email = $request->email;
         $user->company_id = rand(100000, 999999);
         $user->password = Hash::make($request->password);
+        $user->phone_number = $request->phone_number ?? null;
+        $user->address = $request->address ?? null;
         $user->otp = Str::random(6);
         $user->role_type = 'COMPANY';
         if ($request->hasFile('image') && $request->file('image')->isValid()) {

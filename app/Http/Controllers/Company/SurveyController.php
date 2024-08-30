@@ -22,6 +22,10 @@ class SurveyController extends Controller
         {
             $query->where('survey_name', 'like' , '%' . $request->search . '%');
         }
+        if ($request->filled('project_id'))
+        {
+            $query->where('project_id', $request->project_id);
+        }
 
         $projects = $query->paginate($request->per_page ?? 10);
         return response()->json(['data' => $projects], 200);

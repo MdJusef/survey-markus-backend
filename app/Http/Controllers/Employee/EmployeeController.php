@@ -80,7 +80,7 @@ class EmployeeController extends Controller
             ->where('user_id', $user_id)
             ->first();
         if ($assignProjects) {
-            $query = Project::where('id', $assignProjects->project_ids);
+            $query = Project::whereIn('id', $assignProjects->project_ids);
 
             if ($request->filled('project_name')) {
                 $query->where('project_name', 'like', '%' . $request->project_name . '%');
