@@ -124,7 +124,7 @@ class CompanyController extends Controller
         if (empty($company_id)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $employee_request = CompanyJoin::with('user')->where('company_id',$company_id)->where('status','pending')->paginate(10);
+        $employee_request = CompanyJoin::with('user_details')->where('company_id',$company_id)->where('status','pending')->paginate(10);
         return response()->json(['data' => $employee_request]);
     }
 

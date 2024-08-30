@@ -187,10 +187,10 @@ class NotificationController extends Controller
             $userId = $user->id;
             $query = DB::table('notifications')
                 ->where('notifiable_id', $userId)
-//                ->orWhere(function ($query) {
-//                    $query->where('type', '=', 'App\Notifications\CompanyNotification')
-//                        ->whereJsonContains('data->isGlobal', true);
-//                })
+                ->orWhere(function ($query) {
+                    $query->where('type', '=', 'App\Notifications\CompanyNotification')
+                        ->whereJsonContains('data->isGlobal', true);
+                })
                 ->orderBy('created_at', 'desc')
                 ->paginate($request->per_page??10);
 

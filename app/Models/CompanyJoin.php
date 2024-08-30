@@ -12,6 +12,11 @@ class CompanyJoin extends Model
 
     public function user(): BelongsTo
     {
+        return $this->belongsTo(User::class,'company_id','id');
+    }
+
+    public function user_details(): BelongsTo
+    {
         return $this->belongsTo(User::class,'user_id','id');
     }
 }
