@@ -159,7 +159,9 @@ class EventManageController extends Controller
             ->values();
 
         // Build the response structure
+        $company_name = $survey->user->name;
         $response = [
+            'company_name' => $company_name,
             'project_name' => $survey->project->project_name,
             'survey_name' => $survey->survey_name,
             'total_questions' => $total_questions,
