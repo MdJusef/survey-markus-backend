@@ -16,6 +16,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SuperAdmin\AdminController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
 use App\Http\Controllers\SuperAdmin\DashboardController;
+use App\Http\Controllers\SuperAdmin\DeleteEController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -135,4 +136,7 @@ Route::middleware(['auth:api','admin.company'])->group(function () {
 
 Route::middleware(['auth:api','super.admin'])->group(function () {
     Route::resource('/admins', AdminController::class);
+    Route::get('/show-trash-users', [DeleteEController::class, 'showTrashUsers']);
+    Route::get('/restore-trash-user/{id}', [DeleteEController::class, 'restoreTrashUsers']);
+    Route::delete('/delete-user-permanently/{id}', [DeleteEController::class, 'permanentlyDeleteUsers']);
 });

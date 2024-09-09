@@ -156,7 +156,21 @@ class SurveyController extends Controller
 
     public function update(Request $request, string $id)
     {
-        //
+        $user_id = auth()->user()->id;
+        if (empty($user_id)){
+            return response()->json(['message' => 'unauthorized'], 401);
+        }
+        $survey = Survey::find($id);
+        if (empty($survey)){
+            return response()->json(['message' => 'Survey not found'], 404);
+        }
+        $survey->start_date = $request->start_date ?? $survey->start_date;
+        $survey->end_date = $request->end_date ?? $survey->end_date;
+        $survey->update();
+        return response()->json([
+            'message' => 'Survey update successfully',
+            'data' => $survey,
+        ], 200);
     }
     public function destroy( string $id)
     {
