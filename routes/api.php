@@ -13,6 +13,7 @@ use App\Http\Controllers\EmployeeDeleteController;
 use App\Http\Controllers\ESurveyController;
 use App\Http\Controllers\EventManageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SuperAdmin\AdminController;
 use App\Http\Controllers\SuperAdmin\CompanyController;
 use App\Http\Controllers\SuperAdmin\DashboardController;
 use Illuminate\Http\Request;
@@ -132,5 +133,6 @@ Route::middleware(['auth:api','admin.company'])->group(function () {
     Route::get('/read-notification/{id}', [NotificationController::class, 'readNotificationById']);
 });
 
-
-//Route::get('/logout', [AuthController::class, 'logout']);
+Route::middleware(['auth:api','super.admin'])->group(function () {
+    Route::resource('/admins', AdminController::class);
+});

@@ -31,7 +31,6 @@ class SurveyController extends Controller
         return response()->json(['data' => $projects], 200);
     }
 
-
     public function store(SurveyRequest $request)
     {
         $user_id = auth()->user()->id;
@@ -222,9 +221,5 @@ class SurveyController extends Controller
 
         return response()->json($answers, 200);
     }
-
-
-
-
 
 }
