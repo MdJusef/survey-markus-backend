@@ -270,7 +270,7 @@ class QuestionController extends Controller
 
                 $already_response_or_not = Answer::where('survey_id',$question_data->survey_id)->first();
                 if ($already_response_or_not) {
-                    return response()->json(['message' => 'he user has already responded to this survey, so it is not editable'], 400);
+                    return response()->json(['message' => 'The user has already responded to this survey, so it is not editable'], 400);
                 }
 
                 // Update the question fields

@@ -49,5 +49,12 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'otp' => 0,
         ]);
+
+//        \App\Models\CompanyJoin::factory()->create([
+//            'user_id' => 3,
+//            'company_id' => 4,
+//            'status' => 'accepted',
+//        ]);
+
     }
 }

@@ -182,4 +182,9 @@ class EventManageController extends Controller
         $event->delete();
         return response()->json(['message' => 'Event Deleted Successfully'], 200);
     }
+
+    public function test(Request $request)
+    {
+        dd($request);
+    }
 }

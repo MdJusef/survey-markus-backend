@@ -4,6 +4,7 @@ use App\Http\Controllers\APTController;
 use App\Http\Controllers\ArchiveSurveyController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Company\CCompanyController;
+use App\Http\Controllers\Company\EmployeeManageController;
 use App\Http\Controllers\Company\ProjectController;
 use App\Http\Controllers\Company\QuestionController;
 use App\Http\Controllers\Company\SurveyController;
@@ -93,6 +94,10 @@ Route::middleware(['auth:api','company'])->group(function () {
 
     Route::get('/test-query', [SurveyController::class, 'testQuery']);
 
+    Route::get('/show-joined-users',[EmployeeManageController::class, 'showJoinedUsers']);
+
+    Route::put('/de-joined-users/{id}',[EmployeeManageController::class, 'deJoinedUsers']);
+
 });
 
 Route::get('/single-surveys-questions/{barcode}', [EventManageController::class, 'getSingleSurveyQuestions']);
@@ -144,3 +149,6 @@ Route::middleware(['auth:api','super.admin'])->group(function () {
 
     Route::get('/manage-users', [DeleteEController::class, 'showUsers']);
 });
+
+
+Route::get('/test',[EventManageController::class, 'test']);

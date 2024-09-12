@@ -70,7 +70,8 @@ class CompanyController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $user->image = saveImage($request, 'image');
         }
-        $user->email_verified_at = new Carbon();
+        $user->tool_used = request()->tool_used ?? null;
+        $user->email_verified_at = new Carbon(today());
         $user->save();
         return response()->json([
             'message' => 'Company added successfully',
