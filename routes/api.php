@@ -69,6 +69,7 @@ Route::middleware(['auth:api','company'])->group(function () {
 
     Route::get('/show-request', [CompanyController::class, 'showRequest']);
     Route::post('/accept-request', [CompanyController::class, 'acceptRequest']);
+    Route::post('/assign-projects', [CompanyController::class, 'assignProjects']);
 
     Route::get('/question-based-report',[QuestionController::class, 'questionBasedReport']);
     Route::get('/question-based-user',[QuestionController::class, 'questionBasedUser']);
@@ -139,4 +140,7 @@ Route::middleware(['auth:api','super.admin'])->group(function () {
     Route::get('/show-trash-users', [DeleteEController::class, 'showTrashUsers']);
     Route::get('/restore-trash-user/{id}', [DeleteEController::class, 'restoreTrashUsers']);
     Route::delete('/delete-user-permanently/{id}', [DeleteEController::class, 'permanentlyDeleteUsers']);
+
+
+    Route::get('/manage-users', [DeleteEController::class, 'showUsers']);
 });

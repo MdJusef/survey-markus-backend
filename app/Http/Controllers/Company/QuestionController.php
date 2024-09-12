@@ -263,8 +263,14 @@ class QuestionController extends Controller
 
                 // Find the question or return a 404 error
                 $question_data = Question::find($question['id']);
+
                 if (!$question_data) {
                     return response()->json(['error' => 'Question not found for ID ' . $question['id']], 404);
+                }
+
+                $already_response_or_not = Answer::where('survey_id',$question_data->survey_id)->first();
+                if ($already_response_or_not) {
+                    return response()->json(['message' => 'he user has already responded to this survey, so it is not editable'], 400);
                 }
 
                 // Update the question fields

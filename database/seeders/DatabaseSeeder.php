@@ -14,9 +14,40 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+//         \App\Models\User::factory()->create([
+//             'name' => 'Super Admin',
+//             'email' => 'superadmin@gmail.com',
+//             'password' => bcrypt('1234567rr'),
+//             'role_type' => 'SUPER ADMIN',
+//             'email_verified_at' => now(),
+//             'otp' => 0,
+//         ]);
+//
+//        \App\Models\User::factory()->create([
+//            'name' => 'Admin',
+//            'email' => 'admin@gmail.com',
+//            'password' => bcrypt('1234567rr'),
+//            'role_type' => 'ADMIN',
+//            'email_verified_at' => now(),
+//            'otp' => 0,
+//        ]);
+
+//        \App\Models\User::factory()->create([
+//            'name' => 'employee',
+//            'email' => 'employee@gmail.com',
+//            'password' => bcrypt('1234567rr'),
+//            'role_type' => 'EMPLOYEE',
+//            'email_verified_at' => now(),
+//            'otp' => 0,
+//        ]);
+
+        \App\Models\User::factory()->create([
+            'name' => 'COMPANY NAME',
+            'email' => 'company@gmail.com',
+            'password' => bcrypt('1234567rr'),
+            'role_type' => 'COMPANY',
+            'email_verified_at' => now(),
+            'otp' => 0,
+        ]);
     }
 }

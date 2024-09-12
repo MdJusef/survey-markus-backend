@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AssignProjectRequest;
 use App\Http\Requests\CompanyRequest;
 use App\Http\Requests\ProjectAssignRequest;
 use App\Mail\OtpMail;
@@ -113,20 +114,20 @@ class CompanyController extends Controller
         if (empty($company)) {
             return response()->json(['message' => 'Company not found'], 404);
         }
-        if ($company->image) {
-            removeImage($company->image);
-        }
-        $company->delete();
+//        if ($company->image) {
+//            removeImage($company->image);
+//        }
+        $company->softdelete();
         return response()->json(['message' => 'Company deleted successfully'], 200);
     }
 
-    public function showRequest()
+    public function showRequest(Request $request)
     {
         $company_id = auth()->user()->id;
         if (empty($company_id)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $employee_request = CompanyJoin::with('user_details')->where('company_id',$company_id)->where('status','pending')->paginate(10);
+        $employee_request = CompanyJoin::with('user_details')->where('company_id',$company_id)->whereIn('status',['pending','accepted'])->paginate($request->per_page ?? 10);
         return response()->json(['data' => $employee_request]);
     }
 
@@ -169,6 +170,17 @@ class CompanyController extends Controller
         ], 200);
     }
 
-
+    public function assignProjects(AssignProjectRequest $request)
+    {
+        $company_id = auth()->user()->id;
+        $user_id = $request->user_id;
+        $assigned_projects = AssignProject::where('user_id', $user_id)->where('company_id',$company_id)->first();
+        if (empty($assigned_projects)) {
+            return response()->json(['message' => 'Projects is not assigned'], 401);
+        }
+        $assigned_projects->project_ids = $request->project_ids ?? $assigned_projects->project_ids;
+        $assigned_projects->update();
+        return response()->json(['message' => 'Assigned projects update successfully'], 200);
+    }
 
 }

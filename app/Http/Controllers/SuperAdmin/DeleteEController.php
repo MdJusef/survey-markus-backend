@@ -3,11 +3,27 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AllInOneRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class DeleteEController extends Controller
 {
+    public function showUsers(AllInOneRequest $request)
+    {
+        $query = User::query();
+        if ($request->filled('role_type'))
+        {
+            $query->where('role_type',$request->role_type);
+        }
+        if ($request->filled('search'))
+        {
+            $query->where('name','like','%'. $request->search . '%');
+        }
+
+        $users = $query->paginate($request->per_page ?? 10);
+        return response()->json($users);
+    }
     public function showTrashUsers(Request $request)
     {
         $query = User::onlyTrashed();
@@ -15,6 +31,9 @@ class DeleteEController extends Controller
         if ($request->filled('search'))
         {
             $query->where('name','like','%'. $request->search . '%');
+        }
+        if ($request->filled('role_type')){
+            $query->where('role_type',$request->role_type);
         }
 
         $trashedUsers = $query->paginate($request->per_page ?? 10);
