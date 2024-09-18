@@ -26,8 +26,7 @@ class EmployeeManageController extends Controller
     public function deJoinedUsers(string $id)
     {
         $joined_users = CompanyJoin::find($id);
-        $joined_users->status = 'default';
-        $joined_users->save();
+        $joined_users->delete();
         return response()->json(['message' => 'User de joined successfully']);
 
     }

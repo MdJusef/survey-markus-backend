@@ -51,7 +51,7 @@ Route::middleware(['auth:api','admin'])->group(function () {
     Route::post('/update-apt', [AptController::class, 'updateApt']);
 
     Route::get('/delete-employee-request', [EmployeeDeleteController::class, 'showDeleteEmployeeRequest']);
-    Route::get('/delete-employee/{id}', [EmployeeDeleteController::class, 'employeeDeleteById']);
+    Route::patch('/delete-employee/{id}', [EmployeeDeleteController::class, 'employeeDeleteById']);
     Route::get('/cancel-delete-employee/{id}', [EmployeeDeleteController::class, 'cancelDeleteEmployeeRequest']);
 
     Route::get('/admin-notifications', [NotificationController::class, 'adminNotification']);
@@ -71,6 +71,8 @@ Route::middleware(['auth:api','company'])->group(function () {
     Route::get('/show-request', [CompanyController::class, 'showRequest']);
     Route::post('/accept-request', [CompanyController::class, 'acceptRequest']);
     Route::post('/assign-projects', [CompanyController::class, 'assignProjects']);
+
+    Route::get('/show-assign-projects/{id}', [CompanyController::class, 'showAssignProjects']);
 
     Route::get('/question-based-report',[QuestionController::class, 'questionBasedReport']);
     Route::get('/question-based-user',[QuestionController::class, 'questionBasedUser']);
@@ -143,7 +145,7 @@ Route::middleware(['auth:api','admin.company'])->group(function () {
 Route::middleware(['auth:api','super.admin'])->group(function () {
     Route::resource('/admins', AdminController::class);
     Route::get('/show-trash-users', [DeleteEController::class, 'showTrashUsers']);
-    Route::get('/restore-trash-user/{id}', [DeleteEController::class, 'restoreTrashUsers']);
+    Route::patch('/restore-trash-user/{id}', [DeleteEController::class, 'restoreTrashUsers']);
     Route::delete('/delete-user-permanently/{id}', [DeleteEController::class, 'permanentlyDeleteUsers']);
 
 

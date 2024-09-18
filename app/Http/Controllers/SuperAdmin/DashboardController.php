@@ -20,8 +20,6 @@ class DashboardController extends Controller
         $total_company = User::where('role_type', 'COMPANY')->count();
         $total_removed_company = User::where('role_type','COMPANY')->onlyTrashed()->count();
 
-
-
         // Month-wise projects count filtered by year
         $users_by_month = User::where('role_type', 'EMPLOYEE')
             ->whereYear('created_at', $year)

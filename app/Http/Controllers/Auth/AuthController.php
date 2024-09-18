@@ -102,12 +102,6 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 400);
         }
         $userData = User::where('email', $request->email)->first();
-        // return gettype($userData->otp);
-//        if ($userData && Hash::check($request->password, $userData->password)) {
-//            if ($userData->verify_email == 0) {
-//                return response()->json(['message' => 'Your email is not verified'], 401);
-//            }
-//        }
 
         $credentials = $request->only('email', 'password');
 

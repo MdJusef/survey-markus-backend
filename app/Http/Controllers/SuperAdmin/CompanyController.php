@@ -9,6 +9,7 @@ use App\Http\Requests\ProjectAssignRequest;
 use App\Mail\OtpMail;
 use App\Models\AssignProject;
 use App\Models\CompanyJoin;
+use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -68,9 +69,9 @@ class CompanyController extends Controller
         $user->otp = Str::random(6);
         $user->role_type = 'COMPANY';
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            $user->image = saveImage($request, 'image');
+          $user->image = saveImage($request, 'image');
         }
-        $user->tool_used = request()->tool_used ?? null;
+        $user->tool_used = $request->tool_used ?? null;
         $user->email_verified_at = new Carbon(today());
         $user->save();
         return response()->json([
@@ -183,5 +184,22 @@ class CompanyController extends Controller
         $assigned_projects->update();
         return response()->json(['message' => 'Assigned projects update successfully'], 200);
     }
+
+    public function showAssignProjects(string $id)
+    {
+        $company_id = auth()->user()->id;
+        $assigned_projects = AssignProject::where('user_id', $id)->where('company_id',$company_id)->first();
+        if (empty($assigned_projects)) {
+            return response()->json(['message' => 'Assigned projects not found'], 404);
+        }
+        $projectIds = $assigned_projects->project_ids;
+
+        $projects = Project::whereIn('id', $projectIds)->pluck('project_name');
+
+        $assigned_projects->project_name = $projects;
+
+        return response()->json($assigned_projects);
+    }
+
 
 }

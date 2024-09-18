@@ -9,6 +9,7 @@ use App\Models\Answer;
 use App\Models\AssignProject;
 use App\Models\CompanyJoin;
 use App\Models\Project;
+use App\Models\Question;
 use App\Models\Survey;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -93,24 +94,76 @@ class EmployeeController extends Controller
 
     }
 
+//    public function projectBasedSurvey(ProjectBasedSurveyRequest $request)
+//    {
+//        $project_id = $request->project_id;
+//
+//        $query = Survey::with('user')->where('project_id', $project_id);
+//        if ($request->filled('survey_name')){
+//            $query->where('survey_name', 'like' , '%' . $request->input('survey_name') . '%');
+//        }
+//        if ($request->filled('auth_user')){
+//            $employee_id = auth()->user()->id;
+//            $get_survey_ids = Answer::where('user_id', $employee_id)->pluck('survey_id')->unique();
+//
+//            // Modify the query to include only the surveys that exist in the Answer table
+//            $query->whereIn('id', $get_survey_ids);
+//        }
+//        $surveys = $query->paginate(20);
+//        return response()->json($surveys);
+//    }
+
     public function projectBasedSurvey(ProjectBasedSurveyRequest $request)
     {
         $project_id = $request->project_id;
 
+        // Fetch all surveys related to the project with user relationship
         $query = Survey::with('user')->where('project_id', $project_id);
-        if ($request->filled('survey_name')){
-            $query->where('survey_name', 'like' , '%' . $request->input('survey_name') . '%');
-        }
-        if ($request->filled('auth_user')){
-            $employee_id = auth()->user()->id;
-            $get_survey_ids = Answer::where('user_id', $employee_id)->pluck('survey_id')->unique();
 
-            // Modify the query to include only the surveys that exist in the Answer table
-            $query->whereIn('id', $get_survey_ids);
+        // Filter by survey_name if provided
+        if ($request->filled('survey_name')) {
+            $query->where('survey_name', 'like', '%' . $request->input('survey_name') . '%');
         }
-        $surveys = $query->paginate(20);
+
+        // Check if the authenticated user has attended the survey
+        if ($request->filled('auth_user')) {
+            $employee_id = auth()->user()->id;
+
+            // Get all survey ids that the user has answered
+            $answered_survey_ids = Answer::where('user_id', $employee_id)->pluck('survey_id')->unique();
+
+            // Modify the query to include only the surveys the user has answered
+            $query->whereIn('id', $answered_survey_ids);
+        }
+
+        // Paginate the result
+        $surveys = $query->paginate($request->per_page ?? 10);
+
+        // Loop through each survey to check user's answer status and assign color
+        foreach ($surveys as $survey) {
+            $employee_id = auth()->user()->id;
+
+            // Get total number of questions for this survey
+            $total_questions = Question::where('survey_id', $survey->id)->count();
+
+            // Get the number of answered questions for this survey by the user
+            $answered_questions = Answer::where('survey_id', $survey->id)
+                ->where('user_id', $employee_id)
+                ->count();
+
+            // Determine the color based on answer status
+            if ($answered_questions == $total_questions) {
+                $survey->color = 'gray'; // All questions answered
+            } elseif ($answered_questions > 0) {
+                $survey->color = 'green'; // Some questions answered
+            } else {
+                $survey->color = 'yellow'; // No questions answered
+            }
+        }
+
         return response()->json($surveys);
     }
+
 
     public function showJoinCompany()
     {
