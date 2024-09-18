@@ -28,7 +28,7 @@ class CCompanyController extends Controller
         $total_response = Answer::whereHas('survey', function($query) use ($auth_user_id, $year) {
             $query->where('user_id', $auth_user_id)
                 ->whereYear('created_at', $year);
-        })->count();
+        })->distinct('user_id')->count('user_id');
 
         // Month-wise projects count filtered by year
         $projects_by_month = Project::where('user_id', $auth_user_id)
