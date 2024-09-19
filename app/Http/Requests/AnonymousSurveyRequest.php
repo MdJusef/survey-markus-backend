@@ -17,6 +17,7 @@ class AnonymousSurveyRequest extends FormRequest
     {
         return [
             'question_id' => 'required|exists:questions,id',
+            'unique_id' => 'required',
         ];
     }
 }

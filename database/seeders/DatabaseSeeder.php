@@ -42,10 +42,10 @@ class DatabaseSeeder extends Seeder
 //        ]);
 
         \App\Models\User::factory()->create([
-            'name' => 'COMPANY NAME',
-            'email' => 'company@gmail.com',
+            'name' => 'Super Admin',
+            'email' => 'superadmin@gmail.com',
             'password' => bcrypt('1234567rr'),
-            'role_type' => 'COMPANY',
+            'role_type' => 'SUPER ADMIN',
             'email_verified_at' => now(),
             'otp' => 0,
         ]);
@@ -55,6 +55,16 @@ class DatabaseSeeder extends Seeder
 //            'company_id' => 4,
 //            'status' => 'accepted',
 //        ]);
+
+        \App\Models\User::factory()->create([
+            'name' => 'Super Admin',
+            'email' => ' markus.irmler@econsio.de',
+            'password' => bcrypt('1234567rr'),
+            'role_type' => 'SUPER ADMIN',
+            'email_verified_at' => now(),
+            'otp' => 0,
+        ]);
+
 
     }
 }

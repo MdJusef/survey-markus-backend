@@ -72,7 +72,8 @@ class EventManageController extends Controller
 
     public function anonymousSurveys(AnonymousSurveyRequest $request)
     {
-        $ipAddress = $request->getClientIp();
+//        $ipAddress = $request->getClientIp();
+        $ipAddress = $request->unique_id;
         $question_id = $request->question_id;
         $question = Question::where('id', $question_id)->first();
         if (empty($question)) {
@@ -135,7 +136,8 @@ class EventManageController extends Controller
 
     public function anonymousSurveyReport(Request $request)
     {
-        $ipAddress = $request->getClientIp();
+//        $ipAddress = $request->getClientIp();
+        $ipAddress = $request->unique_id;
 
         $survey_id = $request->survey_id;
 

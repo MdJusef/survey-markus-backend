@@ -126,15 +126,15 @@ class EmployeeController extends Controller
         }
 
         // Check if the authenticated user has attended the survey
-        if ($request->filled('auth_user')) {
-            $employee_id = auth()->user()->id;
-
-            // Get all survey ids that the user has answered
-            $answered_survey_ids = Answer::where('user_id', $employee_id)->pluck('survey_id')->unique();
-
-            // Modify the query to include only the surveys the user has answered
-            $query->whereIn('id', $answered_survey_ids);
-        }
+//        if ($request->filled('auth_user')) {
+//            $employee_id = auth()->user()->id;
+//
+//            // Get all survey ids that the user has answered
+//            $answered_survey_ids = Answer::where('user_id', $employee_id)->pluck('survey_id')->unique();
+//
+//            // Modify the query to include only the surveys the user has answered
+//            $query->whereIn('id', $answered_survey_ids);
+//        }
 
         // Paginate the result
         $surveys = $query->paginate($request->per_page ?? 10);
