@@ -18,6 +18,9 @@ class AdminController extends Controller
         if ($request->filled('search')) {
            $query->where('name','like','%'. $request->search . '%');
         }
+        if ($request->filled('role_type')) {
+            $query->where('role_type', $request->role_type);
+        }
         $admins = $query->paginate($request->per_page ?? 10);
         return response()->json($admins);
     }
