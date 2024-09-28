@@ -70,7 +70,7 @@ class AdminController extends Controller
         if (empty($admin)) {
             return response()->json(['message' => 'Admin Not Found'], 404);
         }
-        $admin->forceDelete();
+        $admin->delete();
         return response()->json(['message' => 'Admin Deleted Successfully']);
     }
 }
