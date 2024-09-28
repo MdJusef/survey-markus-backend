@@ -66,7 +66,7 @@ class AdminController extends Controller
 
     public function destroy(string $id)
     {
-        $admin = User::whereIn('role_type',['ADMIN','SUPER ADMIN'])->find($id);
+        $admin = User::where('role_type','ADMIN',)->find($id);
         if (empty($admin)) {
             return response()->json(['message' => 'Admin Not Found'], 404);
         }
