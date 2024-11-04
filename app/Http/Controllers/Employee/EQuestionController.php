@@ -16,7 +16,7 @@ class EQuestionController extends Controller
     public function showQuestions(Request $request)
     {
         $survey_id = $request->survey_id;
-        $question = Question::with('user')->where('survey_id', $survey_id)->get();
+        $question = Question::with('user')->where('survey_id', $survey_id)->orderBy('created_at')->get();
         if ($question->isEmpty()) {
             return response()->json(['message' => 'Question Does Not Exist'], 404);
         }
