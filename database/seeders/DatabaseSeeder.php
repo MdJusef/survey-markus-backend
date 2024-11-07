@@ -56,14 +56,14 @@ class DatabaseSeeder extends Seeder
 //            'status' => 'accepted',
 //        ]);
 
-//        \App\Models\User::factory()->create([
-//            'name' => 'Super Admin',
-//            'email' => ' markus.irmler@econsio.de',
-//            'password' => bcrypt('1234567rr'),
-//            'role_type' => 'SUPER ADMIN',
-//            'email_verified_at' => now(),
-//            'otp' => 0,
-//        ]);
+        \App\Models\User::factory()->create([
+            'name' => 'Super Admin',
+            'email' => ' markus.irmler@econsio.de',
+            'password' => bcrypt('1234567Rr'),
+            'role_type' => 'SUPER ADMIN',
+            'email_verified_at' => now(),
+            'otp' => 0,
+        ]);
 
 
     }
