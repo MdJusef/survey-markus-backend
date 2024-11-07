@@ -133,10 +133,8 @@ Route::middleware(['auth:api','employee'])->group(function (){
 
 });
 
-
 Route::get('/terms-condition', [AptController::class, 'termsCondition']);
 Route::get('/privacy-policy', [AptController::class, 'privacyPolicy']);
-
 
 Route::middleware(['auth:api','admin.company'])->group(function () {
     Route::get('/read-notification/{id}', [NotificationController::class, 'readNotificationById']);
@@ -147,7 +145,6 @@ Route::middleware(['auth:api','super.admin'])->group(function () {
     Route::get('/show-trash-users', [DeleteEController::class, 'showTrashUsers']);
     Route::patch('/restore-trash-user/{id}', [DeleteEController::class, 'restoreTrashUsers']);
     Route::delete('/delete-user-permanently/{id}', [DeleteEController::class, 'permanentlyDeleteUsers']);
-
 
     Route::get('/manage-users', [DeleteEController::class, 'showUsers']);
 });

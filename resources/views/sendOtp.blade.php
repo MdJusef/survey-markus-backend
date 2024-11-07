@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>Send Otp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -44,16 +44,16 @@
 
         <h1>Send Otp</h1>
 
-        <h3>Email from: <a href="surveymarkus@gmail.com">surveymarkus@gmail.com</a></h3>
+        <h3>Email from: <a href="markus.irmler@econsio.de">markus.irmler@econsio.de</a></h3>
         <h3>Your one time Code is <strong style="color: #007bff">{{ $otp }}</strong></h3>
         <h3>Thank you</h3>
 
         <p>If you have any questions, feel free to <a href="#">contact our support team</a>.</p>
         <p>Best regards,</p>
-        <p>Barbar Team</p>
+        <p>Orivo Team</p>
     </div>
     <div class="footer">
-        <p>&copy; 2024 Barbar. All rights reserved.</p>
+        <p>&copy; 2024 Orivo. All rights reserved.</p>
         <p><a href="#">Unsubscribe</a> | <a href="#">Privacy Policy</a></p>
     </div>
 </div>

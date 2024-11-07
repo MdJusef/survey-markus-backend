@@ -23,6 +23,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role_type');
+            $table->string('anonymous')->nullable();
             $table->string('status')->nullable();
             $table->string('tool_used')->nullable();
             $table->timestamp('deleted_at')->nullable();

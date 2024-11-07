@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:archive-expired-surveys')->daily();
     }
 
+
     protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');

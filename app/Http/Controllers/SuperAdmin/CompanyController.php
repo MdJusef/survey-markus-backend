@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssignProjectRequest;
 use App\Http\Requests\CompanyRequest;
 use App\Http\Requests\ProjectAssignRequest;
+use App\Http\Requests\ShowRequestRegister;
 use App\Mail\OtpMail;
 use App\Models\AssignProject;
 use App\Models\CompanyJoin;
@@ -73,6 +74,7 @@ class CompanyController extends Controller
         }
         $user->tool_used = $request->tool_used ?? null;
         $user->email_verified_at = new Carbon(today());
+        $user->anonymous = $request->anonymous ?? null;
         $user->save();
         return response()->json([
             'message' => 'Company added successfully',
@@ -99,6 +101,7 @@ class CompanyController extends Controller
         $company->name = $request->name ?? $company->name;
         $company->email = $request->email ?? $company->email;
         $company->address = $request->address ?? $company->address;
+        $company->anonymous = $request->anonymous ?? $company->anonymous;
         $company->phone_number = $request->phone_number ?? $company->phone_number;
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             if ($company->image) {
@@ -123,13 +126,14 @@ class CompanyController extends Controller
         return response()->json(['message' => 'Company deleted successfully'], 200);
     }
 
-    public function showRequest(Request $request)
+    public function showRequest(ShowRequestRegister $request)
     {
         $company_id = auth()->user()->id;
         if (empty($company_id)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $employee_request = CompanyJoin::with('user_details')->where('company_id',$company_id)->whereIn('status',['pending','accepted'])->paginate($request->per_page ?? 10);
+        $status = $request->status;
+        $employee_request = CompanyJoin::with('user_details')->where('company_id',$company_id)->where('status',$status)->paginate($request->per_page ?? 10);
         return response()->json(['data' => $employee_request]);
     }
 

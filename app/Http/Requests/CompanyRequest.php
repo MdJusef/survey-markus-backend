@@ -22,6 +22,7 @@ class CompanyRequest extends FormRequest
             'company_id' => 'nullable',
             'email' => 'required|string|email|max:60|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'anonymous' => 'in:true,false',
             //'role_type' => ['required', Rule::in(['EMPLOYEE','COMPANY', 'ADMIN', 'SUPER ADMIN'])],
         ];
     }

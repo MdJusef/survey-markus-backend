@@ -104,53 +104,6 @@ class QuestionController extends Controller
         //
     }
 
-//    public function questionBasedReport(Request $request)
-//    {
-//        $survey_id = $request->input('survey_id');
-//        $project_id = $request->input('project_id');
-//        $options = [1, 2, 3, 4, 5];
-//        $optionCounts = collect([
-////            1 => $optionCounts->get(1, 0),
-////            2 => $optionCounts->get(2, 0),
-////            3 => $optionCounts->get(3, 0),
-////            4 => $optionCounts->get(4, 0),
-////            5 => $optionCounts->get(5, 0),
-//        ]);
-//        $surveys = Survey::with(['questions.answer', 'project'])->where('project_id',$project_id)->where('id',$survey_id)->get();
-//
-//        $report = [];
-//
-//        foreach ($surveys as $survey) {
-//            foreach ($survey->questions as $question) {
-//                $totalUsers = $question->answer->groupBy('user_id')->count();
-//                $totalComments = $question->answer->where('comment', '!=', null)->count();
-////                $totalSurveys = $question->answer->groupBy('survey_id')->count();
-//
-//                $optionCounts = $question->answer->groupBy('answer')->map->count();
-////                $optionPercentages = $optionCounts->map(function ($count) use ($totalUsers) {
-////                    return  ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0;
-////                });
-//                $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
-//                    $count = $optionCounts->get($option, 0);
-//                    return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
-//                });
-//
-//                $report[] = [
-//                    'project' => $survey->project->project_name,
-//                    'survey' => $survey->survey_name,
-//                    'question_id' => $question->id,
-//                    'question' => $question->question_en,
-////                    'total_surveys' => $totalSurveys,
-//                    'total_comments' => $totalComments,
-//                    'total_users' => $totalUsers,
-//                    'option_percentages' => $optionPercentages
-//                ];
-//            }
-//        }
-//
-//        return response()->json($report);
-//    }
-
     public function questionBasedReport(Request $request)
     {
 
@@ -178,9 +131,10 @@ class QuestionController extends Controller
                 $overall_survey_count = $anonymous_survey_count + $app_survey_count;
 
                 $totalUsers = $question->answer->groupBy('user_id')->count();
-                $totalComments = $question->answer->where('comment', '!=', null)->count();
-
+                $appComments = $question->answer->where('comment', '!=', null)->count();
+                $qrCodeComments = AnonymousSurveyAnswer::where('question_id',$question->id)->where('comment','!=',null)->count();
                 $optionCounts = $question->answer->groupBy('answer')->map->count();
+                $totalComments = $appComments + $qrCodeComments;
 
                 $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
                     $count = $optionCounts->get($option, 0);
@@ -290,11 +244,7 @@ class QuestionController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            // Catch any exceptions and return a generic error message
             return response()->json(['error' => 'An error occurred while updating questions: ' . $e->getMessage()], 500);
         }
     }
-
-
-
 }
