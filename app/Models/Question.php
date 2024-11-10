@@ -35,8 +35,8 @@ class Question extends Model
         return $this->hasMany(Answer::class);
     }
 
-    public function anonymous_answer():HasOne
+    public function anonymous_answer():HasMany
     {
-        return $this->hasOne(AnonymousSurveyAnswer::class);
+        return $this->hasMany(AnonymousSurveyAnswer::class);
     }
 }

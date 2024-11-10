@@ -130,10 +130,15 @@ class QuestionController extends Controller
                 $app_survey_count = Answer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
                 $overall_survey_count = $anonymous_survey_count + $app_survey_count;
 
-                $totalUsers = $question->answer->groupBy('user_id')->count();
+                $appUsers = $question->answer->groupBy('user_id')->count();
+                $qrCodeUser = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->groupBy('ip_address')->count();
+                $totalUsers = $appUsers + $qrCodeUser;
                 $appComments = $question->answer->where('comment', '!=', null)->count();
                 $qrCodeComments = AnonymousSurveyAnswer::where('question_id',$question->id)->where('comment','!=',null)->count();
+
                 $optionCounts = $question->answer->groupBy('answer')->map->count();
+
+                //$qrOptionCounts = $question->anonymous_answer->groupBy('answer')->map->count();
                 $totalComments = $appComments + $qrCodeComments;
 
                 $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
@@ -170,7 +175,7 @@ class QuestionController extends Controller
             ]);
         }
 
-        return response()->json([]);
+//        return response()->json([]);
     }
 
 

@@ -235,5 +235,4 @@ class SurveyController extends Controller
 
         return response()->json($answers, 200);
     }
-
 }
