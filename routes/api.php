@@ -149,5 +149,4 @@ Route::middleware(['auth:api','super.admin'])->group(function () {
     Route::get('/manage-users', [DeleteEController::class, 'showUsers']);
 });
 
-
 Route::get('/test',[EventManageController::class, 'test']);
