@@ -118,7 +118,7 @@ class EmployeeController extends Controller
         $project_id = $request->project_id;
 
         // Fetch all surveys related to the project with user relationship
-        $query = Survey::with('user')->where('project_id', $project_id)->where('archive_status','false');
+        $query = Survey::with('user')->where('project_id', $project_id);
 
         // Filter by survey_name if provided
         if ($request->filled('survey_name')) {
