@@ -104,14 +104,84 @@ class QuestionController extends Controller
         //
     }
 
+//    public function questionBasedReport(Request $request)
+//    {
+//
+//        $survey_id = $request->input('survey_id');
+//        $project_id = $request->input('project_id');
+//        $perPage = $request->input('per_page', 10); // Default to 10 if 'per_page' is not present
+//
+//
+//
+//        $options = [1, 2, 3, 4, 5];
+//
+//        $surveys = Survey::with(['questions.answer', 'project'])
+//            ->where('project_id', $project_id)
+//            ->where('id', $survey_id)
+//            ->first();
+//
+//        $report = [];
+//
+//        if ($surveys) {
+//            $questions = $surveys->questions()->paginate($perPage); // Pagination on questions
+//
+//            foreach ($questions as $question) {
+//                $anonymous_survey_count = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
+//                $app_survey_count = Answer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
+//                $overall_survey_count = $anonymous_survey_count + $app_survey_count;
+//
+//                $appUsers = $question->answer->groupBy('user_id')->count();
+//                $qrCodeUser = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->groupBy('ip_address')->count();
+//                $totalUsers = $appUsers + $qrCodeUser;
+//                $appComments = $question->answer->where('comment', '!=', null)->count();
+//                $qrCodeComments = AnonymousSurveyAnswer::where('question_id',$question->id)->where('comment','!=',null)->count();
+//
+//                $optionCounts = $question->answer->groupBy('answer')->map->count();
+//
+//                //$qrOptionCounts = $question->anonymous_answer->groupBy('answer')->map->count();
+//                $totalComments = $appComments + $qrCodeComments;
+//
+//                $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
+//                    $count = $optionCounts->get($option, 0);
+//                    return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
+//                });
+//
+//                $report[] = [
+//                    'project' => $surveys->project->project_name,
+//                    'survey' => $surveys->survey_name,
+//                    'question_id' => $question->id,
+//                    'question' => $question->question_en,
+//                    'total_comments' => $totalComments,
+//                    'total_users' => $totalUsers,
+//                    'option_percentages' => $optionPercentages,
+//                    'qr_code_survey' => $anonymous_survey_count,
+//                    'app_survey_count' => $app_survey_count,
+//                    'overall_survey' => $overall_survey_count,
+//                ];
+//            }
+//
+//            // Return paginated data
+//            return response()->json([
+//                'emoji_or_star' => $surveys->emoji_or_star,
+//                'data' => $report,
+//                'pagination' => [
+//                    'total' => $questions->total(),
+//                    'per_page' => $questions->perPage(),
+//                    'current_page' => $questions->currentPage(),
+//                    'last_page' => $questions->lastPage(),
+//                    'from' => $questions->firstItem(),
+//                    'to' => $questions->lastItem(),
+//                ]
+//            ]);
+//        }
+//
+////        return response()->json([]);
+//    }
     public function questionBasedReport(Request $request)
     {
-
         $survey_id = $request->input('survey_id');
         $project_id = $request->input('project_id');
         $perPage = $request->input('per_page', 10); // Default to 10 if 'per_page' is not present
-
-
 
         $options = [1, 2, 3, 4, 5];
 
@@ -126,24 +196,43 @@ class QuestionController extends Controller
             $questions = $surveys->questions()->paginate($perPage); // Pagination on questions
 
             foreach ($questions as $question) {
-                $anonymous_survey_count = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
-                $app_survey_count = Answer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
+                $anonymous_survey_count = AnonymousSurveyAnswer::where('survey_id', $survey_id)
+                    ->where('question_id', $question->id)
+                    ->count();
+                $app_survey_count = Answer::where('survey_id', $survey_id)
+                    ->where('question_id', $question->id)
+                    ->count();
                 $overall_survey_count = $anonymous_survey_count + $app_survey_count;
 
                 $appUsers = $question->answer->groupBy('user_id')->count();
-                $qrCodeUser = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->groupBy('ip_address')->count();
+                $qrCodeUser = AnonymousSurveyAnswer::where('survey_id', $survey_id)
+                    ->where('question_id', $question->id)
+                    ->groupBy('ip_address')
+                    ->count();
                 $totalUsers = $appUsers + $qrCodeUser;
+
                 $appComments = $question->answer->where('comment', '!=', null)->count();
-                $qrCodeComments = AnonymousSurveyAnswer::where('question_id',$question->id)->where('comment','!=',null)->count();
-
-                $optionCounts = $question->answer->groupBy('answer')->map->count();
-
-                //$qrOptionCounts = $question->anonymous_answer->groupBy('answer')->map->count();
+                $qrCodeComments = AnonymousSurveyAnswer::where('question_id', $question->id)
+                    ->where('comment', '!=', null)
+                    ->count();
                 $totalComments = $appComments + $qrCodeComments;
 
-                $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
-                    $count = $optionCounts->get($option, 0);
-                    return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
+                // Calculate combined option counts
+                $appOptionCounts = $question->answer->groupBy('answer')->map->count();
+                $qrOptionCounts = AnonymousSurveyAnswer::where('survey_id', $survey_id)
+                    ->where('question_id', $question->id)
+                    ->get()
+                    ->groupBy('answer')
+                    ->map->count();
+
+                $combinedOptionCounts = collect($options)->mapWithKeys(function ($option) use ($appOptionCounts, $qrOptionCounts) {
+                    $appCount = $appOptionCounts->get($option, 0);
+                    $qrCount = $qrOptionCounts->get($option, 0);
+                    return [$option => $appCount + $qrCount];
+                });
+
+                $optionPercentages = $combinedOptionCounts->map(function ($count) use ($overall_survey_count) {
+                    return ($overall_survey_count > 0) ? ($count / $overall_survey_count) * 100 : 0;
                 });
 
                 $report[] = [
@@ -159,23 +248,20 @@ class QuestionController extends Controller
                     'overall_survey' => $overall_survey_count,
                 ];
             }
-
-            // Return paginated data
-            return response()->json([
-                'emoji_or_star' => $surveys->emoji_or_star,
-                'data' => $report,
-                'pagination' => [
-                    'total' => $questions->total(),
-                    'per_page' => $questions->perPage(),
-                    'current_page' => $questions->currentPage(),
-                    'last_page' => $questions->lastPage(),
-                    'from' => $questions->firstItem(),
-                    'to' => $questions->lastItem(),
-                ]
-            ]);
         }
 
-//        return response()->json([]);
+        return response()->json([
+            'emoji_or_star' => 'star',
+            'data' => $report,
+            'pagination' => [
+                'total' => $questions->total(),
+                'per_page' => $questions->perPage(),
+                'current_page' => $questions->currentPage(),
+                'last_page' => $questions->lastPage(),
+                'from' => $questions->firstItem(),
+                'to' => $questions->lastItem(),
+            ],
+        ]);
     }
 
 
