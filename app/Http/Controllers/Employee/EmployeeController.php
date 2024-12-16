@@ -117,10 +117,14 @@ class EmployeeController extends Controller
     {
         $project_id = $request->project_id;
 
-        // Fetch all surveys related to the project with user relationship
+
         $query = Survey::with('user')->where('project_id', $project_id);
 
-        // Filter by survey_name if provided
+        $today = now()->format('Y-m-d');
+        $query->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today);
+
+
         if ($request->filled('survey_name')) {
             $query->where('survey_name', 'like', '%' . $request->input('survey_name') . '%');
         }

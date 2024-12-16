@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
              'name' => 'Company',
              'email' => 'company@gmail.com',
              'password' => bcrypt('1234567Rr'),
-             'role_type' => 'SUPER ADMIN',
+             'role_type' => 'COMPANY',
              'email_verified_at' => now(),
              'otp' => 0,
          ]);
@@ -64,7 +64,6 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'otp' => 0,
         ]);
-
 
     }
 }

@@ -16,7 +16,7 @@ class SurveyController extends Controller
     public function index(Request $request)
     {
         $company_id = auth()->user()->id;
-        $query = Survey::where('user_id',$company_id)->where('archive_status','false');
+        $query = Survey::where('user_id',$company_id);
 
         if ($request->filled('search'))
         {
