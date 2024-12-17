@@ -251,7 +251,7 @@ class QuestionController extends Controller
         }
 
         return response()->json([
-            'emoji_or_star' => 'star',
+            'emoji_or_star' => $surveys->emoji_or_star,
             'data' => $report,
             'pagination' => [
                 'total' => $questions->total(),
