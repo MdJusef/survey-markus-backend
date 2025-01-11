@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\answerRequest;
 use App\Http\Requests\QuestionBasedReportRequest;
+use App\Models\AnonymousSurveyAnswer;
 use App\Models\Answer;
 use App\Models\Question;
 use App\Models\Survey;
@@ -228,14 +229,23 @@ class EQuestionController extends Controller
             ->where('question_id', $question_id)
             ->get();
 
+        //anonymous user
+         $allAnswersAnonymous = AnonymousSurveyAnswer::with('question.user')
+                    ->where('survey_id',$survey_id)
+                    ->where('question_id',$question_id)
+                    ->get();
+
+        $marge = $allAnswers->concat($allAnswersAnonymous);
+        // return $marge;
+
         // Filter answers based on date range (if provided)
-        $filteredAnswers = $allAnswers;
+        $filteredAnswers = $marge;
         if ($date_range) {
-            $filteredAnswers = $allAnswers->whereBetween('created_at', [$startDate, $endDate]);
+            $filteredAnswers = $marge->whereBetween('created_at', [$startDate, $endDate]);
         }
 
         // Group all answers by question_id
-        $groupedAnswers = $allAnswers->groupBy('question_id');
+        $groupedAnswers = $marge->groupBy('question_id');
         // Group filtered answers by question_id
         $groupedFilteredAnswers = $filteredAnswers->groupBy('question_id');
 

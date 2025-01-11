@@ -15,4 +15,10 @@ class AnonymousSurveyAnswer extends Model
     {
         return $this->belongsTo(Question::class);
     }
+
+    //survey
+    public function survey():BelongsTo
+    {
+        return $this->belongsTo(Survey::class);
+    }
 }
