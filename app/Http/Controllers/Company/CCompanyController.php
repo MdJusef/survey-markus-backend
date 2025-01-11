@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Models\AnonymousSurveyAnswer;
 use App\Models\Answer;
 use App\Models\Project;
 use App\Models\Survey;
@@ -25,10 +26,25 @@ class CCompanyController extends Controller
             ->count();
 
         // Total responses count filtered by year
-        $total_response = Answer::whereHas('survey', function($query) use ($auth_user_id, $year) {
-            $query->where('user_id', $auth_user_id)
-                ->whereYear('created_at', $year);
-        })->distinct('user_id')->count('user_id');
+        $total_anonymous_response = AnonymousSurveyAnswer::whereHas('survey', function ($query) use ($auth_user_id, $year) {
+            $query->where('user_id', $auth_user_id);
+                // ->whereYear('created_at', $year);
+        })
+        ->whereYear('created_at', $year) //added this line
+        ->count('id');
+
+        // dd($total_anonymous_response);
+        //============
+        $total_response = Answer::whereHas('survey', function ($query) use ($auth_user_id, $year) {
+            $query->where('user_id', $auth_user_id);
+                // ->whereYear('created_at', $year);
+        })
+        ->whereYear('created_at', $year) //added this line
+        ->distinct('user_id')->count('user_id');
+        // dd($total_response);
+        $total_response += $total_anonymous_response;
+
+
 
         // Month-wise projects count filtered by year
         $projects_by_month = Project::where('user_id', $auth_user_id)
@@ -43,15 +59,44 @@ class CCompanyController extends Controller
         $projects_by_month = $this->fillMissingMonths($projects_by_month, 'count', $year);
 
         // Month-wise responses count filtered by year
-        $responses_by_month = Answer::whereHas('survey', function($query) use ($auth_user_id, $year) {
-            $query->where('user_id', $auth_user_id)
-                ->whereYear('created_at', $year);
+        $responses_by_month = Answer::whereHas('survey', function ($query) use ($auth_user_id, $year) {
+            $query->where('user_id', $auth_user_id);
+                // ->whereYear('created_at', $year);
         })
+            ->whereYear('created_at', $year) //added this line
             ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(DISTINCT user_id) as count')
             ->groupBy('year', 'month')
             ->orderBy('year', 'asc')
             ->orderBy('month', 'asc')
             ->get();
+
+        $responses_by_month_anonymous = AnonymousSurveyAnswer::whereHas('survey', function ($query) use ($auth_user_id, $year) {
+            $query->where('user_id', $auth_user_id);
+                // ->whereYear('created_at', $year);
+        })
+            ->whereYear('created_at', $year) //added this line
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'asc')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        // Merge the two datasets
+        $marge = $responses_by_month->concat($responses_by_month_anonymous);
+
+        // Group by month and ensure counts are summed up correctly
+        $responses_by_month = $marge
+            ->groupBy(function ($item) {
+                return $item['year'] . '-' . $item['month']; // Group by unique year-month combination
+            })
+            ->map(function ($monthGroup) {
+                return [
+                    'year' => $monthGroup->first()['year'],
+                    'month' => $monthGroup->first()['month'],
+                    'count' => $monthGroup->sum('count'),
+                ];
+            })
+            ->values();
 
         // Ensure each month has a value
         $responses_by_month = $this->fillMissingMonths($responses_by_month, 'count', $year);

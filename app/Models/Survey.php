@@ -32,6 +32,11 @@ class Survey extends Model
         return $this->hasMany(Answer::class);
     }
 
+    public function anonymous_survey_answers(): HasMany
+    {
+        return $this->hasMany(AnonymousSurveyAnswer::class);
+    }
+
     public function barcode():HasOne
     {
         return $this->hasOne(ManageBarcode::class);

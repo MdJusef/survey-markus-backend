@@ -202,6 +202,29 @@ class SurveyController extends Controller
         return response()->json($questions);
     }
 
+    // survey based user answer and anonymous user answer
+    // public function surveyBasedUser(Request $request)
+    // {
+    //     $survey_id = $request->survey_id;
+    //     $survey = Survey::with('user')->find($survey_id);
+
+    //     $survey = collect([$survey])->map(function ($item) {
+    //         return [
+    //             'survey_id' => $item->id,
+    //             'survey_name' => $item->survey_name,
+    //             'project_name' => $item->project->project_name,
+    //             'total_questions' => $item->questions->count(),
+    //             'total_survey' => $item->answers->unique('user_id')->count() + $item->anonymous_survey_answers->count(),
+    //             'total_user' => $item->answers->unique('user_id')->count(),
+
+    //         ];
+    //     })->first();
+
+    //     return response()->json($survey, 200);
+
+    // }
+
+
     public function deleteSurveyUser(Request $request)
     {
         $id = $request->id;

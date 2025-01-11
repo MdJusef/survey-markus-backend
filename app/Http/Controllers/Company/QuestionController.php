@@ -203,7 +203,6 @@ class QuestionController extends Controller
                     ->where('question_id', $question->id)
                     ->count();
                 $overall_survey_count = $anonymous_survey_count + $app_survey_count;
-
                 $appUsers = $question->answer->groupBy('user_id')->count();
                 $qrCodeUser = AnonymousSurveyAnswer::where('survey_id', $survey_id)
                     ->where('question_id', $question->id)
@@ -228,9 +227,12 @@ class QuestionController extends Controller
                 $combinedOptionCounts = collect($options)->mapWithKeys(function ($option) use ($appOptionCounts, $qrOptionCounts) {
                     $appCount = $appOptionCounts->get($option, 0);
                     $qrCount = $qrOptionCounts->get($option, 0);
+
                     return [$option => $appCount + $qrCount];
                 });
 
+
+                // Calculate option percentages
                 $optionPercentages = $combinedOptionCounts->map(function ($count) use ($overall_survey_count) {
                     return ($overall_survey_count > 0) ? ($count / $overall_survey_count) * 100 : 0;
                 });
@@ -281,6 +283,7 @@ class QuestionController extends Controller
 
         return response()->json($user);
     }
+    
     public function updateQuestions(Request $request)
     {
         try {
