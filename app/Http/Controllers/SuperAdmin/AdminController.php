@@ -14,7 +14,8 @@ class AdminController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::whereIn('role_type',['ADMIN','SUPER ADMIN']);
+        // $query = User::whereIn('role_type',['ADMIN','SUPER ADMIN']);
+        $query = User::where('role_type','ADMIN');
         if ($request->filled('search')) {
            $query->where('name','like','%'. $request->search . '%');
         }
