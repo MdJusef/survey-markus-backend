@@ -18,6 +18,7 @@ class QuestionController extends Controller
     {
         $company_id = auth()->user()->id;
         $query = Survey::where('user_id',$company_id)->with('project')
+            ->where('end_date','>=',now()->toDateString()) //new line added 3/2/25
             ->withCount('questions')->withCount('answers');
         if ($request->filled('search')){
             $search = $request->get('search');
@@ -283,7 +284,7 @@ class QuestionController extends Controller
 
         return response()->json($user);
     }
-    
+
     public function updateQuestions(Request $request)
     {
         try {
