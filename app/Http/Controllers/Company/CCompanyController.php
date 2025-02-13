@@ -69,14 +69,15 @@ class CCompanyController extends Controller
             ->groupBy('year', 'month')
             ->orderBy('year', 'asc')
             ->orderBy('month', 'asc')
+            ->distinct('user_id')
             ->get();
 
         $responses_by_month_anonymous = AnonymousSurveyAnswer::whereHas('survey', function ($query) use ($auth_user_id, $year) {
             $query->where('user_id', $auth_user_id);
-                // ->whereYear('created_at', $year);
+            // ->whereYear('created_at', $year);
         })
             ->whereYear('created_at', $year) //added this line
-            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(DISTINCT ip_address) as count') //add Distinct(ip_address) to count only unique ip_address
             ->groupBy('year', 'month')
             ->orderBy('year', 'asc')
             ->orderBy('month', 'asc')
