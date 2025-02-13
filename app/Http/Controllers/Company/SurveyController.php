@@ -7,8 +7,10 @@ use App\Http\Requests\SurveyRequest;
 use App\Models\Answer;
 use App\Models\Survey;
 use App\Models\User;
+use App\Notifications\SurveyNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\NotificationController;
 
 class SurveyController extends Controller
 {
@@ -38,6 +40,8 @@ class SurveyController extends Controller
         if (empty($user_id)){
             return response()->json(['message' => 'unauthorized'], 401);
         }
+
+
         $survey = new Survey();
         $survey->user_id = $user_id; // company_id
         $survey->project_id = $request->project_id;
@@ -47,6 +51,35 @@ class SurveyController extends Controller
         $survey->start_date = $request->start_date;
         $survey->end_date = $request->end_date;
         $survey->save();
+
+        // $notificationData = [
+        //     'title' => 'New Survey Created',
+        //     'message' => 'A new survey has been created by ' . User::find($user_id)->name,
+        //     'type' => 'survey',
+        //     'user_id' => $user_id,
+        //     'user_name' => User::find($user_id)->name,
+        //     'survey_id' => $survey->id,
+        //     'project_id' => $survey->project_id,
+        //     'survey_name' => $survey->survey_name,
+        //     'emoji_or_star' => $survey->emoji_or_star,
+        //     'repeat_status' => $survey->repeat_status,
+        //     'start_date' => $survey->start_date,
+        //     'end_date' => $survey->end_date,
+        // ];
+        // $employees = User::where('role_type', 'EMPLOYEE')->get();
+
+        // foreach ($employees as $employee) {
+        //     $employee->notify(new SurveyNotification($notificationData));
+        // }
+
+        $user= User::find($user_id);
+        $message = 'A new survey has been created by ' . $user->name;
+        $time = $survey->created_at;
+
+
+        $notificationController = new NotificationController();
+       $notify =  $notificationController->sendNotification($user->image, $user->name, $message, $time, $user, true);
+
         return response()->json([
             'message' => 'Survey created successfully',
             'data' => $survey,

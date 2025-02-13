@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\Question;
 use App\Models\Survey;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 
 class QuestionController extends Controller
@@ -269,21 +270,79 @@ class QuestionController extends Controller
 
 
 
-    public function questionBasedUser(Request $request)
-    {
-        $question_id = $request->input('question_id');
-        $query = Answer::where('question_id',$question_id)->with('user');
-        if ($request->filled('search'))
-        {
-            $search = $request->input('search');
-            $query->whereHas('user', function ($query) use ($search) {
-                $query->where('name', 'like', '%'. $search . '%');
-            });
-        }
-        $user = $query->paginate($per_page = $request->per_page ?? 10);
+    // public function questionBasedUser(Request $request)
+    // {
+    //     $question_id = $request->input('question_id');
+    //     $query = Answer::where('question_id',$question_id)->with('user');
+    //     if ($request->filled('search'))
+    //     {
+    //         $search = $request->input('search');
+    //         $query->whereHas('user', function ($query) use ($search) {
+    //             $query->where('name', 'like', '%'. $search . '%');
+    //         });
+    //     }
+    //     $user = $query->paginate($per_page = $request->per_page ?? 10);
 
-        return response()->json($user);
+    //     return response()->json($user);
+    // }
+
+    // no change there
+
+    public function questionBasedUser(Request $request)
+{
+    $perPage = $request->input('per_page', 10);
+    $question_id = $request->input('question_id');
+
+    $query = Question::where('id', $question_id)
+        ->with([
+            'anonymous_answer' => function ($query) {
+                $query->select('id', 'question_id', 'answer', 'comment', 'created_at', 'updated_at')
+                    ->whereNotNull('comment');
+            },
+            'answer' => function ($query) {
+                $query->select('id', 'survey_id', 'user_id', 'question_id', 'answer', 'comment', 'created_at', 'updated_at')
+                    ->whereNotNull('comment')
+                    ->with(['user' => function ($query) {
+                        $query->select('id', 'name', 'email', 'company_id', 'image', 'address', 'phone_number', 'role_type', 'created_at', 'updated_at');
+                    }]);
+            }
+        ])
+        ->select('id')
+        ->first();
+
+    if (!$query) {
+        return response()->json(['message' => 'Question not found'], 404);
     }
+
+
+    $data = collect($query->anonymous_answer)
+        ->merge($query->answer)
+        ->transform(function ($item) {
+            return [
+                'id'          => $item->id,
+                'survey_id'   => $item->survey_id ?? null,
+                'user_id'     => $item->user_id ?? null,
+                'question_id' => $item->question_id,
+                'answer'      => $item->answer,
+                'comment'     => $item->comment,
+                'created_at'  => $item->created_at,
+                'updated_at'  => $item->updated_at,
+                'user'        => $item->user ?? null
+            ];
+        })->values();
+// Pagination Apply
+$page = LengthAwarePaginator::resolveCurrentPage();
+$paginatedData = new LengthAwarePaginator(
+    $data->forPage($page, $perPage),
+    $data->count(),
+    $perPage,
+    $page,
+    ['path' => LengthAwarePaginator::resolveCurrentPath()]
+);
+
+return response()->json($paginatedData);
+}
+
 
     public function updateQuestions(Request $request)
     {

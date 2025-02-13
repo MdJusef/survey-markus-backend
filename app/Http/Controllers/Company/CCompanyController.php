@@ -30,7 +30,8 @@ class CCompanyController extends Controller
             $query->where('user_id', $auth_user_id);
                 // ->whereYear('created_at', $year);
         })
-        ->whereYear('created_at', $year) //added this line
+        ->whereYear('created_at', $year)
+        ->distinct('ip_address') //added this line
         ->count('id');
 
         // dd($total_anonymous_response);
