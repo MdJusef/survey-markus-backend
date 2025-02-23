@@ -42,6 +42,7 @@ class SurveyController extends Controller
         }
 
 
+
         $survey = new Survey();
         $survey->user_id = $user_id; // company_id
         $survey->project_id = $request->project_id;
@@ -71,9 +72,11 @@ class SurveyController extends Controller
         // foreach ($employees as $employee) {
         //     $employee->notify(new SurveyNotification($notificationData));
         // }
-
+        $project_name = DB::table('projects')->where('id', $request->project_id)->value('project_name');
+        // dd($project_name);
         $user= User::find($user_id);
-        $message = 'A new survey has been created by ' . $user->name;
+        // $message = 'A new survey has been created by ' . $user->name;
+        $message = "A new survey '{$survey->survey_name}' has been created under project '{$project_name}' by " . $user->name;
         $time = $survey->created_at;
 
 
