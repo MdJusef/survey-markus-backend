@@ -17,10 +17,13 @@ class SurveyController extends Controller
 
     public function index(Request $request)
     {
+        // return $request->is_show;
         $company_id = auth()->user()->id;
-        $query = Survey::where('user_id',$company_id)
-                ->whereDate('end_date','>=',now()->toDateString());
-
+        $query = Survey::where('user_id',$company_id);
+                // ->whereDate('end_date','>=',now()->toDateString());
+        if($request->is_show == false){
+            $query->whereDate('end_date','>=',now()->toDateString());
+        }
         if ($request->filled('search'))
         {
             $query->where('survey_name', 'like' , '%' . $request->search . '%');
