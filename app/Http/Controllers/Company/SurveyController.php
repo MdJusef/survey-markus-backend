@@ -150,6 +150,42 @@ class SurveyController extends Controller
 //        return response()->json($survey, 200);
 //    }
 
+    // public function show(string $id)
+    // {
+    //     $company_id = auth()->user()->id;
+
+    //     // Fetch the survey with related data and counts
+    //     $survey = Survey::with(['project'])
+    //         ->where('user_id', $company_id)
+    //         ->withCount('questions')
+    //         ->withCount('answers')
+    //         ->find($id);
+
+    //     if (!$survey) {
+    //         return response()->json(['error' => 'Survey not found'], 404);
+    //     }
+
+    //     // Count the number of occurrences for each answer option directly in the query
+    //     $answerCounts = $survey->answers()
+    //         ->selectRaw('answer, COUNT(*) as count')
+    //         ->groupBy('answer')
+    //         ->pluck('count', 'answer')
+    //         ->toArray();
+
+    //     // Initialize the answer counts array with default values
+    //     $counts = [
+    //         'count_1' => $answerCounts[1] ?? 0,
+    //         'count_2' => $answerCounts[2] ?? 0,
+    //         'count_3' => $answerCounts[3] ?? 0,
+    //         'count_4' => $answerCounts[4] ?? 0,
+    //         'count_5' => $answerCounts[5] ?? 0,
+    //     ];
+
+    //     // Add the answer counts to the survey object
+    //     $survey->answer_counts = $counts;
+
+    //     return response()->json($survey, 200);
+    // }
     public function show(string $id)
     {
         $company_id = auth()->user()->id;
@@ -180,6 +216,16 @@ class SurveyController extends Controller
             'count_4' => $answerCounts[4] ?? 0,
             'count_5' => $answerCounts[5] ?? 0,
         ];
+
+        $monthlySurveyRatings = Answer::selectRaw('
+        survey_id,
+        DATE_FORMAT(created_at, "%Y-%m") as month,
+        AVG(answer) as avg_rating
+    ')
+    ->groupBy('survey_id', 'month')
+    ->orderBy('month', 'ASC')
+    ->get();
+    $survey->monthly_ratings = $monthlySurveyRatings;
 
         // Add the answer counts to the survey object
         $survey->answer_counts = $counts;
