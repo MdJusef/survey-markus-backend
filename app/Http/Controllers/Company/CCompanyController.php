@@ -36,13 +36,20 @@ class CCompanyController extends Controller
 
         // dd($total_anonymous_response);
         //============
+        // $total_response = Answer::whereHas('survey', function ($query) use ($auth_user_id, $year) {
+        //     $query->where('user_id', $auth_user_id);
+        //         // ->whereYear('created_at', $year);
+        // })
+        // ->whereYear('created_at', $year) //added this line
+        // ->distinct('user_id')->count('user_id');
+
         $total_response = Answer::whereHas('survey', function ($query) use ($auth_user_id, $year) {
             $query->where('user_id', $auth_user_id);
-                // ->whereYear('created_at', $year);
         })
-        ->whereYear('created_at', $year) //added this line
-        ->count('user_id');
-        // ->distinct('user_id')->count('user_id');
+        ->whereYear('created_at', $year)
+        ->distinct('user_id', 'survey_id') // Unique count of user_id & survey_id
+        ->count();
+
         // dd($total_response);
         $total_response += $total_anonymous_response;
 
