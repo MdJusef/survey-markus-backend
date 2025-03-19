@@ -186,7 +186,7 @@ class SurveyController extends Controller
 
     //     return response()->json($survey, 200);
     // }
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         $company_id = auth()->user()->id;
 
@@ -217,21 +217,77 @@ class SurveyController extends Controller
             'count_5' => $answerCounts[5] ?? 0,
         ];
 
-        $monthlySurveyRatings = Answer::selectRaw('
-        survey_id,
-        DATE_FORMAT(created_at, "%Y-%m") as month,
-        AVG(answer) as avg_rating
-    ')
-    ->groupBy('survey_id', 'month')
-    ->orderBy('month', 'ASC')
-    ->get();
-    $survey->monthly_ratings = $monthlySurveyRatings;
+    //     $monthlySurveyRatings = Answer::selectRaw('
+    //     survey_id,
+    //     DATE_FORMAT(created_at, "%Y-%m") as month,
+    //     AVG(answer) as avg_rating
+    // ')
+    // ->groupBy('survey_id', 'month')
+    // ->orderBy('month', 'ASC')
+    // ->get();
+
+    // $monthlyAverageRatings = Answer::selectRaw('
+    //     survey_id,
+    //     question_id,
+    //     DATE_FORMAT(created_at, "%Y-%M") as month,
+    //     AVG(answer) as avg_rating
+    // ')
+    // ->groupBy('survey_id', 'question_id', 'month')
+    // ->union(
+    //     DB::table('anonymous_survey_answers')
+    //         ->selectRaw('
+    //             survey_id,
+    //             question_id,
+    //             DATE_FORMAT(created_at, "%Y-%M") as month,
+    //             AVG(answer) as avg_rating
+    //         ')
+    //         ->groupBy('survey_id', 'question_id', 'month')
+    // )
+    // ->orderBy('month', 'ASC')
+    // ->get();
+    $months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    $ratings = $survey->answers()
+        ->selectRaw('survey_id, question_id, DATE_FORMAT(created_at, "%M") as month, AVG(answer) as avg_rating')
+        ->where('survey_id', $id)
+        ->where('question_id', $request->question_id)
+        ->groupBy('survey_id', 'question_id', 'month')
+        ->union(
+            DB::table('anonymous_survey_answers')
+                ->selectRaw('survey_id, question_id, DATE_FORMAT(created_at, "%M") as month, AVG(answer) as avg_rating')
+                ->where('survey_id', $id)
+                ->where('question_id', $request->question_id)
+                ->groupBy('survey_id', 'question_id', 'month')
+        )
+        ->orderByRaw("FIELD(month, '" . implode("','", $months) . "')") 
+        ->get();
+
+    $monthlyAverageRatings = collect($months)->map(function ($month) use ($ratings) {
+        return [
+            'month' => $month,
+            'avg_rating' => $ratings->firstWhere('month', $month)->avg_rating ?? 0
+        ];
+    });
+
+
+        // Initialize the monthly ratings array with default values
+        // $monthlySurveyRatings = [
+        //     'month' => $monthlySurveyRatings->pluck('month'),
+        //     'avg_rating' => $monthlySurveyRatings->pluck('avg_rating'),
+        // ];
+
+        // Add the monthly ratings to the survey object
+        $survey->monthly_ratings = $monthlyAverageRatings;
 
         // Add the answer counts to the survey object
         $survey->answer_counts = $counts;
 
         return response()->json($survey, 200);
     }
+
 
 
 
