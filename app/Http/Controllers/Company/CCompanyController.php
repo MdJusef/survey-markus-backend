@@ -41,7 +41,8 @@ class CCompanyController extends Controller
                 // ->whereYear('created_at', $year);
         })
         ->whereYear('created_at', $year) //added this line
-        ->distinct('user_id')->count('user_id');
+        ->count('user_id');
+        // ->distinct('user_id')->count('user_id');
         // dd($total_response);
         $total_response += $total_anonymous_response;
 
