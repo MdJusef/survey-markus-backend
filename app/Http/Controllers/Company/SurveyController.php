@@ -11,6 +11,7 @@ use App\Notifications\SurveyNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\NotificationController;
+use App\Models\Question;
 
 class SurveyController extends Controller
 {
@@ -262,7 +263,7 @@ class SurveyController extends Controller
                 ->where('question_id', $request->question_id)
                 ->groupBy('survey_id', 'question_id', 'month')
         )
-        ->orderByRaw("FIELD(month, '" . implode("','", $months) . "')") 
+        ->orderByRaw("FIELD(month, '" . implode("','", $months) . "')")
         ->get();
 
     $monthlyAverageRatings = collect($months)->map(function ($month) use ($ratings) {
@@ -399,5 +400,22 @@ class SurveyController extends Controller
         });
 
         return response()->json($answers, 200);
+    }
+
+    //survey based question report
+    public function surveyBasedQuestions(Request $request)
+    {
+        $survey_id = $request->survey_id;
+        $questions = Question::where('survey_id',$survey_id)->get();
+        if($questions->isEmpty()){
+            return response()->json([
+                'success' => false,
+                'message' => 'No question found'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'questions'=> $questions
+        ]);
     }
 }

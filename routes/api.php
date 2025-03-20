@@ -100,6 +100,9 @@ Route::middleware(['auth:api','company'])->group(function () {
 
     Route::put('/de-joined-users/{id}',[EmployeeManageController::class, 'deJoinedUsers']);
 
+    //survey base questions
+    Route::get('/survey-based-questions/', [SurveyController::class, 'surveyBasedQuestions']);
+
 });
 
 Route::get('/single-surveys-questions/{barcode}', [EventManageController::class, 'getSingleSurveyQuestions']);
