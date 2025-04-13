@@ -11,7 +11,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('app:archive-expired-surveys')->daily();
-        $schedule->command('app:send-survey-notifications')->everyMinute();
+        $schedule->command('app:send-survey-notifications')->daily();
     }
 
 
