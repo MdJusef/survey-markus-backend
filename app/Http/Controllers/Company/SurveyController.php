@@ -196,7 +196,15 @@ class SurveyController extends Controller
             ->where('user_id', $company_id)
             ->withCount('questions')
             ->withCount('answers')
+            ->withCount('anonymous_survey_answers')
             ->find($id);
+
+       collect([$survey])->transform(function($survey) {
+            $survey->answers_count = $survey->answers_count + $survey->anonymous_survey_answers_count;
+            return $survey;
+        });
+
+        $survey->makeHidden(['anonymous_survey_answers_count']);
 
         if (!$survey) {
             return response()->json(['error' => 'Survey not found'], 404);
@@ -206,9 +214,15 @@ class SurveyController extends Controller
         $answerCounts = $survey->answers()
             ->selectRaw('answer, COUNT(*) as count')
             ->groupBy('answer')
+            ->union(
+                DB::table('anonymous_survey_answers')
+                    ->selectRaw('answer, COUNT(*) as count')
+                    ->where('survey_id', $id)
+                    ->groupBy('answer')
+            )
             ->pluck('count', 'answer')
             ->toArray();
-
+                // return $answerCounts[1] ?? 0;
         // Initialize the answer counts array with default values
         $counts = [
             'count_1' => $answerCounts[1] ?? 0,
@@ -265,7 +279,7 @@ class SurveyController extends Controller
         )
         ->orderByRaw("FIELD(month, '" . implode("','", $months) . "')")
         ->get();
-
+        // return $ratings;
     $monthlyAverageRatings = collect($months)->map(function ($month) use ($ratings) {
         return [
             'month' => $month,
