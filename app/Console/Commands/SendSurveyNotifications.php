@@ -48,7 +48,7 @@ class SendSurveyNotifications extends Command
             $data = [
                 'survey_id' => $survey->id,
                 'user_id' => $user->id,
-                'message' => 'Reminder: You can now take the "' . $survey->survey_name . '" survey again',
+                'message' => 'It\'s time again for the "' . $survey->survey_name . '" survey — share your feedback with us!',
             ];
 
             $user->notify(new SurveyReminderNotification($data));
