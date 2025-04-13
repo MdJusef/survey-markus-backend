@@ -290,7 +290,7 @@ class QuestionController extends Controller
                 'qn' => $index + 1,
                 'question' => $question->question_en,
                 'answer_score' => $ans->answer,
-                'emoji' => $this->getEmoji($ans->answer),
+                'emoji' => $this->getEmoji($ans->answer, $survey->emoji_or_star),
                 'comment' => $ans->comment ?? '-',
                 'via' => 'app',
                 'date' => $ans->created_at->format('d.m.Y'),
@@ -313,7 +313,7 @@ class QuestionController extends Controller
                 'qn' => $index + 1,
                 'question' => $question->question_en,
                 'answer_score' => $ans->answer,
-                'emoji' => $this->getEmoji($ans->answer),
+                'emoji' => $this->getEmoji($ans->answer, $survey->emoji_or_star),
                 'comment' => $ans->comment ?? '-',
                 'via' => 'qr-code',
                 'date' => $ans->created_at->format('d.m.Y'),
@@ -328,17 +328,34 @@ class QuestionController extends Controller
         ]);
     }
 
-    private function getEmoji($score)
-    {
-        return match ((int) $score) {
+    private function getEmoji($answer, $type)
+{
+    if ($type === 'emoji') {
+        $emojiMap = [
             1 => '😡',
-            2 => '🙁',
+            2 => '😟',
             3 => '😐',
             4 => '🙂',
             5 => '😄',
-            default => '',
-        };
+        ];
+        return $emojiMap[$answer] ?? '';
     }
+
+    if ($type === 'star') {
+        $colorMap = [
+            1 => '#FF0000',
+            2 => '#ff9100',
+            3 => '#FFD500',
+            4 => '#B5D900',
+            5 => '#07CC00',
+        ];
+
+        $color = $colorMap[$answer] ?? 'gray';
+        return "<span style='color: $color;'>" . str_repeat('★', (int) $answer) . "</span>";
+    }
+
+    return '';
+}
 
     // public function questionBasedUser(Request $request)
     // {
