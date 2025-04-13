@@ -320,7 +320,6 @@ class QuestionController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Survey export data fetched successfully.',
             'data' => $data,
         ]);
     }
