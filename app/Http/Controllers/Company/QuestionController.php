@@ -272,7 +272,7 @@ class QuestionController extends Controller
             ->where('project_id', $project_id)
             ->where('id', $survey_id)
             ->firstOrFail();
-
+        // return $survey;
         $data = [];
 
         foreach ($survey->questions as $index => $question) {
@@ -293,6 +293,8 @@ class QuestionController extends Controller
                 'emoji' => $this->getEmoji($ans->answer),
                 'comment' => $ans->comment ?? '-',
                 'via' => 'app',
+                'date' => $ans->created_at->format('d.m.Y'),
+                'time' => $ans->created_at->format('H:i A'),
             ];
             }
 
@@ -314,6 +316,8 @@ class QuestionController extends Controller
                 'emoji' => $this->getEmoji($ans->answer),
                 'comment' => $ans->comment ?? '-',
                 'via' => 'qr-code',
+                'date' => $ans->created_at->format('d.m.Y'),
+                'time' => $ans->created_at->format('H:i A'),
             ];
             }
         }
