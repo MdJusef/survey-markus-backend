@@ -332,11 +332,11 @@ class QuestionController extends Controller
 {
     if ($type === 'emoji') {
         $emojiMap = [
-            1 => '<img src="' . url('icons/angry.png') . ' />',
-            2 => '<img src="' . url('icons/sad.png') . ' />',
-            3 => '<img src="' . url('icons/silent.png') . ' />',
-            4 => '<img src="' . url('icons/blushing.png') . ' />',
-            5 => '<img src="' . url('icons/smile.png') . ' />',
+            1 => '😡',
+            2 => '😟',
+            3 => '😐',
+            4 => '🙂',
+            5 => '😄',
         ];
         return $emojiMap[$answer] ?? '';
     }
