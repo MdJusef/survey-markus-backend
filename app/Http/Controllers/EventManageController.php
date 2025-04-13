@@ -8,6 +8,7 @@ use App\Models\Answer;
 use App\Models\ManageBarcode;
 use App\Models\Question;
 use App\Models\Survey;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -185,8 +186,38 @@ class EventManageController extends Controller
         return response()->json(['message' => 'Event Deleted Successfully'], 200);
     }
 
-    public function test(Request $request)
-    {
-        dd($request);
-    }
+    // public function test(Request $request)
+    // {
+    //     $now = now();
+
+    //     $statuses = Answer::where('next_notification_at', '<=', $now)->get();
+    //     // return response()->json($statuses);
+    //     $surveyss = null;
+    //     foreach ($statuses as $status) {
+    //         $user = User::find($status->user_id);
+    //         $survey = Survey::find($status->survey_id);
+    //         if ($survey && $survey->end_date && Carbon::parse($survey->end_date)->isPast()) {
+    //             continue;
+    //         }
+    //         if (!$user || !$survey) continue;
+
+    //         // $user->notify(new SurveyReminderNotification($survey));
+
+    //         $surveyss = $survey->survey_name;
+    //         switch ($survey->repeat_status) {
+    //             case 'daily': $next = $now->copy()->addDay(); break;
+    //             case 'weekly': $next = $now->copy()->addWeek(); break;
+    //             case 'monthly': $next = $now->copy()->addMonth(); break;
+    //             default: $next = null;
+    //         }
+
+    //         // if ($next) {
+    //         //     $status->update(['next_notification_at' => $next]);
+    //         // }
+    //     }
+    //     return response()->json([
+    //         'message' => 'Notification sent successfully',
+    //         'survey' => $surveyss,
+    //     ]);
+    // }
 }

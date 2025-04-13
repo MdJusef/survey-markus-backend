@@ -18,22 +18,19 @@ class QuestionController extends Controller
     public function index(Request $request)
     {
         $company_id = auth()->user()->id;
-        $query = Survey::where('user_id',$company_id)->with('project')
-            ->where('end_date','>=',now()->toDateString()) //new line added 3/2/25
+        $query = Survey::where('user_id', $company_id)->with('project')
+            ->where('end_date', '>=', now()->toDateString()) //new line added 3/2/25
             ->withCount('questions')->withCount('answers');
-        if ($request->filled('search')){
+        if ($request->filled('search')) {
             $search = $request->get('search');
-            $query->where('survey_name','like', '%' . $search . '%');
+            $query->where('survey_name', 'like', '%' . $search . '%');
         }
         $per_page = $request->per_page ?? 10;
         $questions = $query->paginate($per_page);
         return response()->json($questions);
     }
 
-    public function create()
-    {
-
-    }
+    public function create() {}
 
     public function store(Request $request)
     {
@@ -82,7 +79,7 @@ class QuestionController extends Controller
     public function show(string $id)
     {
         $company_id = auth()->user()->id;
-        $questions = Survey::where('user_id',$company_id)->where('id',$id)->with('project','questions','answers')->paginate(10);
+        $questions = Survey::where('user_id', $company_id)->where('id', $id)->with('project', 'questions', 'answers')->paginate(10);
         return response()->json($questions);
     }
 
@@ -91,14 +88,11 @@ class QuestionController extends Controller
         //
     }
 
-//    public function update(Request $request, string $id)
-//    {
-//        //
-//    }
-    public function update(Request $request, string $id)
-    {
-
-    }
+    //    public function update(Request $request, string $id)
+    //    {
+    //        //
+    //    }
+    public function update(Request $request, string $id) {}
 
 
     public function destroy(string $id)
@@ -106,79 +100,79 @@ class QuestionController extends Controller
         //
     }
 
-//    public function questionBasedReport(Request $request)
-//    {
-//
-//        $survey_id = $request->input('survey_id');
-//        $project_id = $request->input('project_id');
-//        $perPage = $request->input('per_page', 10); // Default to 10 if 'per_page' is not present
-//
-//
-//
-//        $options = [1, 2, 3, 4, 5];
-//
-//        $surveys = Survey::with(['questions.answer', 'project'])
-//            ->where('project_id', $project_id)
-//            ->where('id', $survey_id)
-//            ->first();
-//
-//        $report = [];
-//
-//        if ($surveys) {
-//            $questions = $surveys->questions()->paginate($perPage); // Pagination on questions
-//
-//            foreach ($questions as $question) {
-//                $anonymous_survey_count = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
-//                $app_survey_count = Answer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
-//                $overall_survey_count = $anonymous_survey_count + $app_survey_count;
-//
-//                $appUsers = $question->answer->groupBy('user_id')->count();
-//                $qrCodeUser = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->groupBy('ip_address')->count();
-//                $totalUsers = $appUsers + $qrCodeUser;
-//                $appComments = $question->answer->where('comment', '!=', null)->count();
-//                $qrCodeComments = AnonymousSurveyAnswer::where('question_id',$question->id)->where('comment','!=',null)->count();
-//
-//                $optionCounts = $question->answer->groupBy('answer')->map->count();
-//
-//                //$qrOptionCounts = $question->anonymous_answer->groupBy('answer')->map->count();
-//                $totalComments = $appComments + $qrCodeComments;
-//
-//                $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
-//                    $count = $optionCounts->get($option, 0);
-//                    return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
-//                });
-//
-//                $report[] = [
-//                    'project' => $surveys->project->project_name,
-//                    'survey' => $surveys->survey_name,
-//                    'question_id' => $question->id,
-//                    'question' => $question->question_en,
-//                    'total_comments' => $totalComments,
-//                    'total_users' => $totalUsers,
-//                    'option_percentages' => $optionPercentages,
-//                    'qr_code_survey' => $anonymous_survey_count,
-//                    'app_survey_count' => $app_survey_count,
-//                    'overall_survey' => $overall_survey_count,
-//                ];
-//            }
-//
-//            // Return paginated data
-//            return response()->json([
-//                'emoji_or_star' => $surveys->emoji_or_star,
-//                'data' => $report,
-//                'pagination' => [
-//                    'total' => $questions->total(),
-//                    'per_page' => $questions->perPage(),
-//                    'current_page' => $questions->currentPage(),
-//                    'last_page' => $questions->lastPage(),
-//                    'from' => $questions->firstItem(),
-//                    'to' => $questions->lastItem(),
-//                ]
-//            ]);
-//        }
-//
-////        return response()->json([]);
-//    }
+    //    public function questionBasedReport(Request $request)
+    //    {
+    //
+    //        $survey_id = $request->input('survey_id');
+    //        $project_id = $request->input('project_id');
+    //        $perPage = $request->input('per_page', 10); // Default to 10 if 'per_page' is not present
+    //
+    //
+    //
+    //        $options = [1, 2, 3, 4, 5];
+    //
+    //        $surveys = Survey::with(['questions.answer', 'project'])
+    //            ->where('project_id', $project_id)
+    //            ->where('id', $survey_id)
+    //            ->first();
+    //
+    //        $report = [];
+    //
+    //        if ($surveys) {
+    //            $questions = $surveys->questions()->paginate($perPage); // Pagination on questions
+    //
+    //            foreach ($questions as $question) {
+    //                $anonymous_survey_count = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
+    //                $app_survey_count = Answer::where('survey_id',$survey_id)->where('question_id',$question->id)->count();
+    //                $overall_survey_count = $anonymous_survey_count + $app_survey_count;
+    //
+    //                $appUsers = $question->answer->groupBy('user_id')->count();
+    //                $qrCodeUser = AnonymousSurveyAnswer::where('survey_id',$survey_id)->where('question_id',$question->id)->groupBy('ip_address')->count();
+    //                $totalUsers = $appUsers + $qrCodeUser;
+    //                $appComments = $question->answer->where('comment', '!=', null)->count();
+    //                $qrCodeComments = AnonymousSurveyAnswer::where('question_id',$question->id)->where('comment','!=',null)->count();
+    //
+    //                $optionCounts = $question->answer->groupBy('answer')->map->count();
+    //
+    //                //$qrOptionCounts = $question->anonymous_answer->groupBy('answer')->map->count();
+    //                $totalComments = $appComments + $qrCodeComments;
+    //
+    //                $optionPercentages = collect($options)->mapWithKeys(function ($option) use ($optionCounts, $totalUsers) {
+    //                    $count = $optionCounts->get($option, 0);
+    //                    return [$option => ($totalUsers > 0) ? ($count / $totalUsers) * 100 : 0];
+    //                });
+    //
+    //                $report[] = [
+    //                    'project' => $surveys->project->project_name,
+    //                    'survey' => $surveys->survey_name,
+    //                    'question_id' => $question->id,
+    //                    'question' => $question->question_en,
+    //                    'total_comments' => $totalComments,
+    //                    'total_users' => $totalUsers,
+    //                    'option_percentages' => $optionPercentages,
+    //                    'qr_code_survey' => $anonymous_survey_count,
+    //                    'app_survey_count' => $app_survey_count,
+    //                    'overall_survey' => $overall_survey_count,
+    //                ];
+    //            }
+    //
+    //            // Return paginated data
+    //            return response()->json([
+    //                'emoji_or_star' => $surveys->emoji_or_star,
+    //                'data' => $report,
+    //                'pagination' => [
+    //                    'total' => $questions->total(),
+    //                    'per_page' => $questions->perPage(),
+    //                    'current_page' => $questions->currentPage(),
+    //                    'last_page' => $questions->lastPage(),
+    //                    'from' => $questions->firstItem(),
+    //                    'to' => $questions->lastItem(),
+    //                ]
+    //            ]);
+    //        }
+    //
+    ////        return response()->json([]);
+    //    }
     public function questionBasedReport(Request $request)
     {
         $survey_id = $request->input('survey_id');
@@ -187,15 +181,16 @@ class QuestionController extends Controller
 
         $options = [1, 2, 3, 4, 5];
 
-        $surveys = Survey::with(['questions.answer', 'project'])
+        $surveys = Survey::with(['questions.answer.user:id,email', 'project'])
             ->where('project_id', $project_id)
             ->where('id', $survey_id)
             ->first();
-
+        // return $surveys;
         $report = [];
 
         if ($surveys) {
             $questions = $surveys->questions()->paginate($perPage); // Pagination on questions
+            // return $questions;
 
             foreach ($questions as $question) {
                 $anonymous_survey_count = AnonymousSurveyAnswer::where('survey_id', $survey_id)
@@ -268,7 +263,79 @@ class QuestionController extends Controller
         ]);
     }
 
+    public function exportSurvey(Request $request)
+    {
+        $survey_id = $request->input('survey_id');
+        $project_id = $request->input('project_id');
 
+        $survey = Survey::with(['questions.answer.user:id,email', 'questions.anonymous_answer', 'project'])
+            ->where('project_id', $project_id)
+            ->where('id', $survey_id)
+            ->firstOrFail();
+
+        $data = [];
+
+        foreach ($survey->questions as $index => $question) {
+            // Named Answers
+            foreach ($question->answer as $ans) {
+            $data[] = [
+                'emoji_or_star' => $survey->emoji_or_star,
+                'participant' => $ans->user->email ?? 'unknown',
+                'user_id' => $ans->user_id,
+                'project_id' => $survey->project_id,
+                'project_name' => $survey->project->project_name,
+                'survey_id' => $survey->id,
+                'survey_name' => $survey->survey_name,
+                'question_id' => $question->id,
+                'qn' => $index + 1,
+                'question' => $question->question_en,
+                'answer_score' => $ans->answer,
+                'emoji' => $this->getEmoji($ans->answer),
+                'comment' => $ans->comment ?? '-',
+                'via' => 'app',
+            ];
+            }
+
+            // Anonymous Answers
+            foreach ($question->anonymous_answer as $ans) {
+            $data[] = [
+                'sl_no' => $index + 1,
+                'emoji_or_star' => $survey->emoji_or_star,
+                'participant' => 'no name / qr-code',
+                'user_id' => null,
+                'project_id' => $survey->project_id,
+                'project_name' => $survey->project->project_name,
+                'survey_id' => $survey->id,
+                'survey_name' => $survey->survey_name,
+                'question_id' => $question->id,
+                'qn' => $index + 1,
+                'question' => $question->question_en,
+                'answer_score' => $ans->answer,
+                'emoji' => $this->getEmoji($ans->answer),
+                'comment' => $ans->comment ?? '-',
+                'via' => 'qr-code',
+            ];
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Survey export data fetched successfully.',
+            'data' => $data,
+        ]);
+    }
+
+    private function getEmoji($score)
+    {
+        return match ((int) $score) {
+            1 => '😡',
+            2 => '🙁',
+            3 => '😐',
+            4 => '🙂',
+            5 => '😄',
+            default => '',
+        };
+    }
 
     // public function questionBasedUser(Request $request)
     // {
@@ -289,59 +356,59 @@ class QuestionController extends Controller
     // no change there
 
     public function questionBasedUser(Request $request)
-{
-    $perPage = $request->input('per_page', 10);
-    $question_id = $request->input('question_id');
+    {
+        $perPage = $request->input('per_page', 10);
+        $question_id = $request->input('question_id');
 
-    $query = Question::where('id', $question_id)
-        ->with([
-            'anonymous_answer' => function ($query) {
-                $query->select('id', 'question_id', 'answer', 'comment', 'created_at', 'updated_at')
-                    ->whereNotNull('comment');
-            },
-            'answer' => function ($query) {
-                $query->select('id', 'survey_id', 'user_id', 'question_id', 'answer', 'comment', 'created_at', 'updated_at')
-                    ->whereNotNull('comment')
-                    ->with(['user' => function ($query) {
-                        $query->select('id', 'name', 'email', 'company_id', 'image', 'address', 'phone_number', 'role_type', 'created_at', 'updated_at');
-                    }]);
-            }
-        ])
-        ->select('id')
-        ->first();
+        $query = Question::where('id', $question_id)
+            ->with([
+                'anonymous_answer' => function ($query) {
+                    $query->select('id', 'question_id', 'answer', 'comment', 'created_at', 'updated_at')
+                        ->whereNotNull('comment');
+                },
+                'answer' => function ($query) {
+                    $query->select('id', 'survey_id', 'user_id', 'question_id', 'answer', 'comment', 'created_at', 'updated_at')
+                        ->whereNotNull('comment')
+                        ->with(['user' => function ($query) {
+                            $query->select('id', 'name', 'email', 'company_id', 'image', 'address', 'phone_number', 'role_type', 'created_at', 'updated_at');
+                        }]);
+                }
+            ])
+            ->select('id')
+            ->first();
 
-    if (!$query) {
-        return response()->json(['message' => 'Question not found'], 404);
+        if (!$query) {
+            return response()->json(['message' => 'Question not found'], 404);
+        }
+
+
+        $data = collect($query->anonymous_answer)
+            ->merge($query->answer)
+            ->transform(function ($item) {
+                return [
+                    'id'          => $item->id,
+                    'survey_id'   => $item->survey_id ?? null,
+                    'user_id'     => $item->user_id ?? null,
+                    'question_id' => $item->question_id,
+                    'answer'      => $item->answer,
+                    'comment'     => $item->comment,
+                    'created_at'  => $item->created_at,
+                    'updated_at'  => $item->updated_at,
+                    'user'        => $item->user ?? null
+                ];
+            })->values();
+        // Pagination Apply
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $paginatedData = new LengthAwarePaginator(
+            $data->forPage($page, $perPage),
+            $data->count(),
+            $perPage,
+            $page,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+
+        return response()->json($paginatedData);
     }
-
-
-    $data = collect($query->anonymous_answer)
-        ->merge($query->answer)
-        ->transform(function ($item) {
-            return [
-                'id'          => $item->id,
-                'survey_id'   => $item->survey_id ?? null,
-                'user_id'     => $item->user_id ?? null,
-                'question_id' => $item->question_id,
-                'answer'      => $item->answer,
-                'comment'     => $item->comment,
-                'created_at'  => $item->created_at,
-                'updated_at'  => $item->updated_at,
-                'user'        => $item->user ?? null
-            ];
-        })->values();
-// Pagination Apply
-$page = LengthAwarePaginator::resolveCurrentPage();
-$paginatedData = new LengthAwarePaginator(
-    $data->forPage($page, $perPage),
-    $data->count(),
-    $perPage,
-    $page,
-    ['path' => LengthAwarePaginator::resolveCurrentPath()]
-);
-
-return response()->json($paginatedData);
-}
 
 
     public function updateQuestions(Request $request)
@@ -376,7 +443,7 @@ return response()->json($paginatedData);
                     return response()->json(['error' => 'Question not found for ID ' . $question['id']], 404);
                 }
 
-                $already_response_or_not = Answer::where('survey_id',$question_data->survey_id)->first();
+                $already_response_or_not = Answer::where('survey_id', $question_data->survey_id)->first();
                 if ($already_response_or_not) {
                     return response()->json(['message' => 'The user has already responded to this survey, so it is not editable'], 400);
                 }
@@ -396,7 +463,6 @@ return response()->json($paginatedData);
                 'message' => 'Questions updated successfully',
                 'data' => $responses
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred while updating questions: ' . $e->getMessage()], 500);
         }

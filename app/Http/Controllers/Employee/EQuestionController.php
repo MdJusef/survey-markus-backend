@@ -115,6 +115,12 @@ class EQuestionController extends Controller
         }
 
         $answer->answer = $request->answer ?? null;
+        $answer->next_notification_at = match($survey->repeat_status) {
+            'daily' => now()->addDay(),
+            'weekly' => now()->addWeek(),
+            'monthly' => now()->addMonth(),
+            default => null,
+        }; 
         $answer->save();
 
         return response()->json(['message' => 'Answer Saved Successfully', 'data' => $answer], 200);
