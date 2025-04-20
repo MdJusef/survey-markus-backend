@@ -272,7 +272,7 @@ class QuestionController extends Controller
             ->where('project_id', $project_id)
             ->where('id', $survey_id)
             ->firstOrFail();
-        return $survey;
+        // return $survey;
         $data = [];
 
         foreach ($survey->questions as $index => $question) {
@@ -280,7 +280,7 @@ class QuestionController extends Controller
             foreach ($question->answer as $ans) {
             $data[] = [
                 'emoji_or_star' => $survey->emoji_or_star,
-                'participant' => !$survey->user->anonymous ? $ans->user->email : 'Anonymous',
+                'participant' => $survey->user->anonymous ? 'Anonymous' :$ans->user->email,
                 'user_id' => $ans->user_id,
                 'project_id' => $survey->project_id,
                 'project_name' => $survey->project->project_name,
