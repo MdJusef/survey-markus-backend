@@ -268,11 +268,11 @@ class QuestionController extends Controller
         $survey_id = $request->input('survey_id');
         $project_id = $request->input('project_id');
 
-        $survey = Survey::with(['questions.answer.user:id,email', 'questions.anonymous_answer', 'project'])
+        $survey = Survey::with(['user:id,anonymous','questions.answer.user:id,email', 'questions.anonymous_answer', 'project'])
             ->where('project_id', $project_id)
             ->where('id', $survey_id)
             ->firstOrFail();
-        // return $survey;
+
         $data = [];
 
         foreach ($survey->questions as $index => $question) {
@@ -280,7 +280,7 @@ class QuestionController extends Controller
             foreach ($question->answer as $ans) {
             $data[] = [
                 'emoji_or_star' => $survey->emoji_or_star,
-                'participant' => !$ans->user->anonymous ? $ans->user->email : 'Anonymous',
+                'participant' => !$survey->user->anonymous ? $ans->user->email : 'Anonymous',
                 'user_id' => $ans->user_id,
                 'project_id' => $survey->project_id,
                 'project_name' => $survey->project->project_name,
