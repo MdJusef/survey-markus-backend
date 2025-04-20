@@ -272,7 +272,7 @@ class QuestionController extends Controller
             ->where('project_id', $project_id)
             ->where('id', $survey_id)
             ->firstOrFail();
-
+        return $survey;
         $data = [];
 
         foreach ($survey->questions as $index => $question) {
