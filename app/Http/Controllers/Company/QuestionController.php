@@ -280,7 +280,7 @@ class QuestionController extends Controller
             foreach ($question->answer as $ans) {
             $data[] = [
                 'emoji_or_star' => $survey->emoji_or_star,
-                'participant' => $ans->user->email ?? 'unknown',
+                'participant' => !$ans->user->anonymous ? $ans->user->email : 'Anonymous',
                 'user_id' => $ans->user_id,
                 'project_id' => $survey->project_id,
                 'project_name' => $survey->project->project_name,
