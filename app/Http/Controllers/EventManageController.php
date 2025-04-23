@@ -9,8 +9,10 @@ use App\Models\ManageBarcode;
 use App\Models\Question;
 use App\Models\Survey;
 use App\Models\User;
+use App\Notifications\SurveyReminderNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -190,7 +192,11 @@ class EventManageController extends Controller
     // {
     //     $now = now();
 
-    //     $statuses = Answer::where('next_notification_at', '<=', $now)->get();
+    //     $statuses = Answer::select('user_id', 'survey_id')
+    //     ->where('next_notification_at', '<=', $now)
+    //     ->groupBy('user_id', 'survey_id')
+    //     ->get();
+    //     // dd($statuses);
     //     // return response()->json($statuses);
     //     $surveyss = null;
     //     foreach ($statuses as $status) {
@@ -200,8 +206,12 @@ class EventManageController extends Controller
     //             continue;
     //         }
     //         if (!$user || !$survey) continue;
-
-    //         // $user->notify(new SurveyReminderNotification($survey));
+    //         $data = [
+    //             'survey_id' => $survey->id,
+    //             'user_id' => $user->id,
+    //             'message' => 'It\'s time again for the "' . $survey->survey_name . '" survey — share your feedback with us!',
+    //         ];
+    //         $user->notify(new SurveyReminderNotification($data));
 
     //         $surveyss = $survey->survey_name;
     //         switch ($survey->repeat_status) {
@@ -211,9 +221,11 @@ class EventManageController extends Controller
     //             default: $next = null;
     //         }
 
-    //         // if ($next) {
-    //         //     $status->update(['next_notification_at' => $next]);
-    //         // }
+    //         if ($next) {
+    //             Answer::where('user_id', $user->id)
+    //                 ->where('survey_id', $survey->id)
+    //                 ->update(['next_notification_at' => $next]);
+    //         }
     //     }
     //     return response()->json([
     //         'message' => 'Notification sent successfully',

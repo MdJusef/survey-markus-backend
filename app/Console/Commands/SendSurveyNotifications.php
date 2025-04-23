@@ -33,7 +33,10 @@ class SendSurveyNotifications extends Command
     {
         $now = now();
 
-        $statuses = Answer::where('next_notification_at', '<=', $now)->get();
+        $statuses = Answer::select('user_id', 'survey_id')
+                    ->where('next_notification_at', '<=', $now)
+                    ->groupBy('user_id', 'survey_id')
+                    ->get();
 
         foreach ($statuses as $status) {
             $user = User::find($status->user_id);
@@ -62,7 +65,9 @@ class SendSurveyNotifications extends Command
             }
 
             if ($next) {
-                $status->update(['next_notification_at' => $next]);
+                Answer::where('user_id', $user->id)
+                    ->where('survey_id', $survey->id)
+                    ->update(['next_notification_at' => $next]);
             }
         }
 
