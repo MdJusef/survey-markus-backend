@@ -266,13 +266,13 @@ class SurveyController extends Controller
     ];
 
     $ratings = $survey->answers()
-        ->selectRaw('survey_id, question_id, DATE_FORMAT(created_at, "%M") as month, AVG(answer) as avg_rating')
+        ->selectRaw('survey_id, question_id, DATE_FORMAT(created_at, "%M") as month,COUNT(id) as count, SUM(answer) as total_rating')
         ->where('survey_id', $id)
         ->where('question_id', $request->question_id)
         ->groupBy('survey_id', 'question_id', 'month')
         ->union(
             DB::table('anonymous_survey_answers')
-                ->selectRaw('survey_id, question_id, DATE_FORMAT(created_at, "%M") as month, AVG(answer) as avg_rating')
+                ->selectRaw('survey_id, question_id, DATE_FORMAT(created_at, "%M") as month, COUNT(id) as count, SUM(answer) as total_rating')
                 ->where('survey_id', $id)
                 ->where('question_id', $request->question_id)
                 ->groupBy('survey_id', 'question_id', 'month')
@@ -283,7 +283,7 @@ class SurveyController extends Controller
     $monthlyAverageRatings = collect($months)->map(function ($month) use ($ratings) {
         return [
             'month' => $month,
-            'avg_rating' => $ratings->firstWhere('month', $month)->avg_rating ?? 0
+            'avg_rating' => $ratings->where('month', $month)->sum('total_rating') / ($ratings->where('month', $month)->sum('count') ?: 1),
         ];
     });
 
