@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 class SurveyNotification extends Notification
 {
     use Queueable;
-    protected $data,$isGlobal;
+    protected $data;
     /**
      * Create a new notification instance.
      */
